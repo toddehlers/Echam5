@@ -1,0 +1,177 @@
+#!/client/bin/ksh
+#
+# ===============================================================
+# |||||||||||||| Options for LoadLeveler (IBM) ||||||||||||||||||
+# ===============================================================
+#
+# @ shell                = /client/bin/ksh
+# @ job_type             = parallel
+# @ node_usage		 = not_shared
+# @ Network.MPI          = sn_all,not_shared,US
+# @ rset                 = rset_mcm_affinity
+# @ mcm_affinity_options = mcm_accumulate
+# @ node                 = 4
+# @ tasks_per_node       = 4
+# @ resources            = ConsumableMemory(3000mb)
+# @ task_affinity	 = cpu(8)
+# @ parallel_threads	 = 4
+# @ wall_clock_limit     = 04:00:00   
+# @ job_name             = tbTt21  
+# @ output               = $(job_name).o$(jobid)
+# @ error                = $(job_name).e$(jobid)
+# @ notification 	 = never
+#----------------------------------
+# @ queue
+#export MEMORY_AFFINITY=MCM
+#export OMP_NUM_THREADS=8 
+#export OMP_STACKSIZE=50M 
+#export MP_PRINTENV=YES
+#export MP_LABELIO=YES
+#export MP_INFOLEVEL=2
+#export MP_EAGER_LIMIT=64k
+#export MP_BUFFER_MEM=64M,256M
+#export MP_USE_BULK_XFER=NO
+#export MP_BULK_MIN_MSG_SIZE=128k
+#export MP_RFIFO_SIZE=4M
+#export MP_SHM_ATTACH_THRESH=500000
+#export LAPI_DEBUG_STRIPE_SEND_FLIP=8
+#
+# ===============================================================
+# ||||||||| Job script for running ECHAM5 on Blizzard |||||||||||
+# ===============================================================
+#
+# If set and a command has a non-zero exit status, ERR trap is 
+# executed and programme exits 
+set -ex
+#
+# ============================
+# ||||||||| Basic declarations 
+#
+# .... job
+EXP="tbTt21"     # experiment identifier
+RERUN=.false.    # rerun switch: false for initial run, otherwise true 
+LABORT=.true.    # stop at the end of the rerun chain? 
+NCPUS=8          # number of CPUs for parallel run
+NPROCA=4         # number of CPUs to process task A
+NPROCB=4	 # number of CPUs to process task B
+NTHREADS=1       # number of threads. 1 if no hybrid run
+NPROMA=16        # blocking length/vector length
+#
+#export EXP
+#export RERUN
+#export LABORT
+#export NCPUS
+#export NPROCA
+#export NPROCB
+#export NTHREADS
+#export NPROMA
+#
+# .... model
+RES=21           # spectral truncation/resolution
+LEVELS=19        # number of levels
+LAMIP=.true.     # run with amip SST?
+LMLO=.false.     # run with slab ocean?
+YEARI=1986       # start/restart year of run
+YEARF=1992	 # final year of run
+#REMON=1         # first month of restart (should match value+1 in restart file)
+#
+#export RES
+#export LEVELS
+#export LAMIP
+#export LMLO
+#
+# ===========================
+# ||||||||| Path declarations
+#
+# path to working directory, eg. model folder
+WORK_DIR=/pf/b/b380035/echam-5.4.02
+#
+# path to job script
+SCRIPTDIR=${WORK_DIR}/run
+#
+# path to free space for output
+EXPDIR=/work/scratch/b/b380035/${EXP}     
+#
+# path to initial data
+INITIAL_DATA=/pf/b/b380035/T${RES}
+#
+# path to amip sst
+BOUNDARY_DATA=${INITIAL_DATA}/amip2
+#
+# path to model executable + executable name
+MODEL=${WORK_DIR}/bin/echam5
+#
+# --------------------------
+# create experiment directory if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+#
+# --------------------------
+#  output and rerun files written into $EXPDIR 
+cd $EXPDIR
+#
+# ================================
+# ||||||||| specification of files
+#
+rm -f unit.?? sst* ice* hdpara.nc hdstart.nc rrtadata 
+#
+ln -sf  ${INITIAL_DATA}/T${RES}L${LEVELS}_jan_spec.nc       unit.23
+ln -sf  ${INITIAL_DATA}/T${RES}_jan_surf.nc                 unit.24
+#
+ln -sf  ${INITIAL_DATA}/T${RES}_O3clim2.nc                  unit.21
+ln -sf  ${INITIAL_DATA}/T${RES}_VLTCLIM.nc                  unit.90
+ln -sf  ${INITIAL_DATA}/T${RES}_VGRATCLIM.nc                unit.91
+ln -sf  ${INITIAL_DATA}/T${RES}_TSLCLIM2.nc                 unit.92
+#
+ln -sf  ${INITIAL_DATA}/surrta_data                         rrtadata
+ln -sf  ${INITIAL_DATA}/hdpara.nc                           hdpara.nc
+ln -sf  ${INITIAL_DATA}/hdstart.nc                          hdstart.nc
+#
+ln -sf  ${BOUNDARY_DATA}/T${RES}_amip2sst_clim.nc           unit.20
+ln -sf  ${BOUNDARY_DATA}/T${RES}_amip2sic_clim.nc           unit.96
+#
+years="1985 1986 1986 1987 1988 1989"
+years="${years} 1990 1991 1992"   # continue years values
+for year in $years ; do
+ln -sf  ${BOUNDARY_DATA}/T${RES}_amip2sst_${year}.nc  sst${year}
+ln -sf  ${BOUNDARY_DATA}/T${RES}_amip2sic_${year}.nc  ice${year}
+done
+#
+# =========================
+# ||||||||| ECHAM5 namelist
+#
+cat > namelist.echam << EOF
+&runctl
+  out_datapath = "${EXPDIR}/"
+  out_expname  = "${EXP}"
+  out_filetype = 2                  ! 1 - GRIB1, 2 - netCDF
+  lresume      = $RERUN
+  lamip        = $LAMIP
+  lmlo	       = $LMLO
+  labort       = $LABORT
+  dt_start     = $YEARI,01,01,12,0,0
+  dt_stop      = $YEARF,12,31,12,0,0
+  putdata      = 6, 'hours', 'first', 0
+  putrerun     = 10, 'days', 'last', 0
+  nproma       = ${NPROMA} 
+  nproca       = ${NPROCA}
+  nprocb       = ${NPROCB}
+/
+EOF
+#
+# ==============================
+# ||||||||| Run model executable
+#
+# IBM/POE startup
+#
+poe $MODEL 
+#
+# =======================================
+# ||||||||| Change declarations for rerun 
+#
+# RERUN=.true.
+#
+exit
+#
+# End of script

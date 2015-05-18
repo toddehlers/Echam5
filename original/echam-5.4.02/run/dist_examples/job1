@@ -1,0 +1,44 @@
+#!/bin/ksh
+
+#PBS -l cpunum_prc=1,cputim_job=02:00:00
+#PBS -l memsz_job=1gb
+#PBS -N subNNN
+#PBS -j o
+################################################################################
+#
+hostname
+#
+################################################################################
+#
+#DPATH
+#EXP
+#DAY
+#MONTH
+#YEAR
+#
+F_PROGINF=detail
+export F_PROGINF
+#
+EXPNO=`echo $EXP | cut -c1-5`
+RFILE=${EXPNO}re${YEAR}${MONTH}
+#
+cd $DPATH
+#
+if [ "$MONTH" = "06" -o "$MONTH" = "12" ]
+then
+#
+cp rerun_${EXP}_echam $RFILE
+#
+echo ' rerun file copied '
+#
+cp $RFILE $UT/runNNN/rerun/$RFILE
+Usize=`ls -l $UT/runNNN/rerun/$RFILE | awk '{print \$5}'`
+Ssize=`ls -l $RFILE | awk '{print \$5}'`
+  if [ "$Usize" = "$Ssize" ]; then
+    echo $RFILE saved successfully
+    rm $RFILE
+  fi
+fi
+#
+####################################################
+#

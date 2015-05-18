@@ -1,0 +1,542 @@
+======================================================================================
+Documentation of model namelists
+ECHAM5-Namelists (M. Esch, U. Schlese, 20-FEB-2002)
+======================================================================================
+
+    The parameters of the namelist position routine was changed due to
+    extended functionality. Rewind of the namelist file before positioning
+    can be supressed so that a namelist group can be read in repeatedly.
+
+    If no variables are set, a namelist group may be omitted now.
+
+
+---- SDSCTL  - control parameter and I/O units  --------------------------------------
+     ======
+  Name         Type         Purpose                                             Default
+  ----         ----         -------                                             -------
+
+  LRESUME     LOGICAL      Rerun switch:                                           TRUE
+                            TRUE:  Restart from rerun files 
+                            FALSE: Start from initial files 
+  NSDS1       INTEGER      Integers for optional use                                 1
+  NSDS2                                                                              1
+  ASDS1       REAL         Reals for optional use                                    1.
+  ASDS2                                                                              1.
+  LSDS1       LOGICAL      Logicals for optional use                              FALSE 
+  LSDS2                                                                           FALSE 
+  LDEBUGIO    LOGICAL      Logical to debug io                                    FALSE 
+  LDEBUGMEM   LOGICAL      Logical to debug memory                                FALSE 
+  LDEBUGEV    LOGICAL      debugging events                                       FALSE
+  LDEBUGHD    LOGICAL      debugging hd model                                     FALSE
+  SUBJOB_CMD  CHARACTER    subjob command                                         'qsub'
+  loldrerun   LOGICAL      old rerun-file name-convention                         FALSE
+  out_datapath CHARACTER   name of data path with ending \264/\264
+  out_expname  CHARACTER   prefix of file names with experiment name
+  out_filetype INTEGER     output file type (GRIB=1, NetCDF=2)                       1
+  trac_filetype INTEGER    output file type (GRIB=1, NetCDF=2)                       1
+  
+      I/O units for files:
+
+  NIST        INTEGER      Annual cycle of surface temperature                      20
+  NICE        INTEGER      Annual cycle of ice distribution                         96
+  NINI        INTEGER      Optional tracer initial fields                           12
+  NFL1        INTEGER      Optional fields read at NSTEP=0                          13
+  NFL2        INTEGER      Optional fields read at NSTEP=NRESUM                     14
+                                        (including NSTEP=0)
+  NEMI        INTEGER      Surface emissions                                        15
+  NISP        INTEGER      Spectral initial file                                    23
+  NIGP        INTEGER      Gridpoint initial file                                   24
+  NGRIBS      INTEGER      Grib output file for spectral variables                  29
+  NGRIBG      INTEGER      Grib output file for grid point variables             NGRIBS
+  NGRIBX      INTEGER      Grib output file for G4X_ variables                      16
+  NDIAHDF     INTEGER      File for horizontal diffusion statistics                 11
+  NJIN        INTEGER      "job_" input file                                        30
+  NJOUT       INTEGER      "subjob_" output file                                    39
+
+
+---- RUNCTL  - run control variables -------------------------------------------------
+     ======
+  Name         Type         Purpose                                             Default
+  ----         ----         -------                                             -------
+
+  DT_START    INTEGER      start model at time (yr,mo,dy,hr,mi,se)                 6*0
+              ARRAY
+  DT_STOP     INTEGER      stop model at time (yr,mo,dy,hr,mi,se)                  6*0
+              ARRAY
+  NO_DAYS     INTEGER      length of a run in days, starting from 
+                             initial date (dominant when declared)                   0
+  NO_STEPS    INTEGER      length of a run in steps, starting from
+                             start or rerun time (dominant)                          0
+  NO_CYCLES   INTEGER      maximal number of rerun intervals                         1
+  PUTDATA     STRUCTURE    Frequency of write-up                  12,'hours','first',0
+  PUTRERUN    STRUCTURE    Frequency of rerun files write-up       1,'months','last',0
+  ARCRERUN    STRUCTURE    rerun files saving interval             1,'months','none',0
+  COUPOCEAN   STRUCTURE    ECHAM-Ocean coupling interval             1,'days','none',0
+  COUPHD      STRUCTURE    ECHAM-HD-Model coupling interval          1,'days','none',0
+  LABORT      LOGICAL      True for exit at end of experiment                      TRUE
+                           to interrupt rerun chain
+  DELTA_TIME  REAL         Time step in seconds       T21    T31    T42    T63    T106
+                                                      ---    ---    ---    ---    ----
+                                                     2400.  1800.  1440.   900.   720.
+  NSUB        INTEGER      Number of submit jobs written at the                      0
+                           end of a run (maximum 9)
+  TRIGJOB(9)  STRUCTURE    Frequency of submits in months          1,'months','none',0
+  LSUB        LOGICAL      True for submitting NSUB jobs                           TRUE
+  LAMIP       LOGICAL      True for using variable SST-files                      FALSE
+  LHG3X       LOGICAL      True for using G3X information from                    FALSE
+                           rerun files, false for using namelist
+  NSPACE1     INTEGER      Size of space managed by                           automatic
+                           memory manager for root task                      adjustment
+  NSPACE2     INTEGER      Same as NSPACE1 but for slave tasks                      "
+  NSPADD      INTEGER      Memory space to add to or subtract from                   0
+                           NSPACE1 and NSPACE2
+  NG3XP       INTEGER      Number of extra G3-fields (G3Xnn, max. 99)                0
+  NG3XL       INTEGER      Number of levels of extra G3-fields                    99*1
+  LXACCU      LOGICAL      Switches for accumulation (=mean over                  99*F
+              ARRAY        postprocessing interval) of extra G3-fields
+  NXPBITS     INTEGER      Number of bits of extra G3-fields in                  99*16
+              ARRAY        GRIB-format 
+  NG4XP       INTEGER      Number of extra G4-fields (G4Xnn, max. 99)                0
+  NG4XL       INTEGER      Number of levels of extra G4-fields                    99*1
+              ARRAY
+  L4XACCU     LOGICAL      Switches for accumulation (=mean over                  99*F
+              ARRAY        postprocessing interval) of extra G4-fields
+  NX4PBITS    INTEGER      Number of bits of extra G4-fields in                  99*16
+              ARRAY        GRIB-format 
+  PUTG4DATA   STRUCTURE    Frequency of write up 
+                            of extra G4-fields                    12,'hours','first',0
+  NUMFL1      INTEGER      Number of optional fields read at NSTEP=0                 0
+  NUMFL2      INTEGER      Number of optional fields read at NSTEP=NRESUM            0
+                                                  (including NSTEP=0)
+  LMIDATM     LOGICAL      middle atmosphere model version                        FALSE
+  NPROCA      INTEGER      number of processors for set A                            1
+  NPROCB      INTEGER      number of processors for set B                            1
+  LDAILY      LOGICAL      switch for daily statistics at first step of a day     FALSE
+                            TRUE:  on
+                            FALSE: off
+  LPALEO      LOGICAL      use old or new orbit                                    TRUE
+                            TRUE:  old orbit
+                            FALSE: new orbit
+  LCOLUMN     LOGICAL      switch for single column model                         FALSE
+                            TRUE for running column model (see COLUMNCTL)
+
+
+---- COLUMNCTL  - parameters for single column model (only with LCOLUMN=TRUE in RUNCTL)
+     =========
+  Name         Type         Purpose                                             Default
+  ----         ----         -------                                             -------
+
+  COMODE      CHARACTER    specify the mode of the column model run:
+                (len=8)                                                              ''
+                           ''        3d model run
+                           'traject' write trajectory (run 3d model)
+                           'resid'   write residui
+                           'force'   force column model to full model traject.
+                           'add'     add residui to column model trajectory
+                           'free'    run the column model without forcing
+  LREWIND     LOGICAL      rewind forcing and residui file before reading
+                           for constant forcing                                 .false.
+  NFORCE      INTEGER      time steps to force (for add,free)                         1
+  LVCTCH      LOGICAL      read vct table from forcing file                     .false.
+
+                           specify the location(s) of the column model run:
+  LAT_1D      INTEGER      global latitude  index (traject':up to 100 indices)
+  LON_1D      INTEGER      global longitude index (traject':up to 100 indices)
+                           or specify a region ('traject' mode only)
+  LAT_1DB     INTEGER      global latitude  indices (lower, upper bound)
+  LON_1DB     INTEGER      global longitude indices (lower, upper bound)
+
+                           specify the pressure gradient ('free' mode only)
+  UG_1DR      REAL         geostrophic wind component                                0.
+  VG_1D       REAL         geostrophic wind component                                0.
+  K_VG        INTEGER      take vg above this level from 'traject'                   0
+  LFRES       LOGICAL      T for forcing in resid-mode                               T
+  UVFAC       LOGICAL      /=0 if u,v are scaled by sqcst(irow)
+
+                         flags for column model integration:
+  INT_T       INTEGER      temperature                                               1
+  INT_PS      INTEGER      log surface pressure                                      1
+  INT_UV      INTEGER      wind fields                                               1
+  INT_VTR     INTEGER      vertical transport of q,xl,xi,..,tracers                  1
+
+                         flags for application of forcing fields
+  FOR_T       INTEGER      temperature                                               1
+  FOR_PS      INTEGER      log surface pressure                                      1
+  FOR_UV      INTEGER      wind fields                                               1
+  FOR_Q       INTEGER      specific humidity                                         0
+  FOR_X       INTEGER      cloud water content                                       0
+  FOR_XT      INTEGER      tracer                                                    0
+
+  FOR_TEST    INTEGER      test switches                                             0
+  FOR_DEF     INTEGER      default value                                             1
+  FOR_EXT     INTEGER      external forcing switches                                 0
+  FOR_ALL     INTEGER      default for flags not activated                           0
+
+  FOR_D       INTEGER      divergence                                           for_def
+  FOR_VO      INTEGER      vorticity                                            for_def
+  FOR_DT      INTEGER      horizontal temperature gradient                      for_def
+  FOR_DP      INTEGER      log surface pressure gradient                        for_def
+  FOR_TR      INTEGER      qe,xe,xte tendencies by transport                    for_def
+  FOR_TRP     INTEGER      surf.press. modific. by transport                    for_def
+  FOR_TRT     INTEGER      xte tendencies by transport                          for_def
+  FOR_ZM      INTEGER      zonal means (ul, u0, du0)                            for_def
+  FOR_POL     INTEGER      polfilter tendencies in physc                        for_def
+
+  FOR_TTE     INTEGER      temperature tendency term                                 0
+  FOR_UVT     INTEGER      wind tendency terms                                       0
+  FOR_PST     INTEGER      surface pressure tendency                                 0
+  FOR_PT      INTEGER      vertical velocity                                         0
+  FOR_SST     REAL         prescribe SeaSurfaceTemperature                           0
+  CHK_Q_0     INTEGER      check that specific hum. is >= 0                          0
+
+  CNUDGUV     REAL(nlev)   nudging weight for u,v                                    0
+  CNUDGT      REAL(nlev)   nudging weight for temperature                            0
+  CNUDGP      REAL         nudging weight for log sfc pressure                       0
+  CNUDGQ      REAL(nlev)   nudging weight for specific humidity                      0
+  CNUDGX      REAL(nlev)   nudging weight for cloud water + ice                      0
+  CNUDGXT     REAL(nlev)   nudging weight for tracers                                0
+
+                     
+---- DYNCTL  - control options for the dynamics and general control ------------------
+     ======
+  Name         Type         Purpose                                             Default
+  ----         ----         -------                                             -------
+                                                                              
+  DIAGDYN     STRUCTURE    Frequency of dynamical diagnostics        5,'days','none',0
+  DIAGVERT    STRUCTURE    Frequency of dynamical diagnostics 
+                            for each level                           5,'days','none',0
+  LZONDIA     LOGICAL      True for zonal diagnostics                             FALSE
+                           in NDIADFR interval
+  LDIAHDF     LOGICAL      True for write out of diffusion diagnostic             FALSE
+  LUMAX       LOGICAL      True to print information on maximum wind              FALSE
+                           in NDIADFR interval
+  VCHECK      REAL         Threshold value for high wind speed warning             200.
+  APSURF      REAL         Global mean surface pressure [Pa]                     98610.
+                           (depends on orography)
+  DAMPTH      REAL         Damping time in hours for the horizintal 
+                           diffusion of vorticiy, 
+                           divergence and temperature
+                                                       T21    T31    T42    T63   T106
+                                                       ---    ---    ---    ---   ----
+                         19 level                       6.    12.     9.     9.     3.
+                         lmidatm=true                 192.     "      "      "      "
+
+  NTRN        INTEGER      critical wavenumbers for strong 
+                           stratospheric damping (array depending on resolution,
+                           see setdyn.f90)
+  NLVSTD1     INTEGER      last layer at which stratospheric horizontal diffusion
+                           is enhanced
+  NLVSTD2     INTEGER      first layer at which stratospheric horizontal diffusion
+                           is enhanced
+                           default values for nlvstd1 and nlvstd2:
+                                                       T21    T31    T42    T63   T106
+                                                       ---    ---    ---    ---   ----
+                         19 level                       1      2      2      2      2 
+                         lmidatm=true                   1      1      1      1      1
+
+  LDRAG       LOGICAL      apply drag to upper 2 levels
+                           FALSE for NLEV>=19 or lgwdrag, TRUE else
+  VCRIT       REAL         critical velocity above which horizontal diffusion  
+                           is enhanced
+                                                       T21    T31    T42    T63   T106
+                                                       ---    ---    ---    ---   ----
+                                                        85     85     85     85     68
+
+  HDAMP       REAL         damping factor for strong stratospheric damping           1.
+  ENSTDIF     REAL         factor by which stratospheric horizontal diffusion is
+                           increased from one level to next level above 
+                                                       T21    T31    T42    T63   T106
+                                                       ---    ---    ---    ---   ----    
+                         19 level                     0.1    0.4    1.     1.     1.25
+                         lmidatm=true                 1.     1.     1.     1.     1.
+
+  CDRAG       REAL         drag coefficient                                     14 days
+                           CDRAG > 0. : drag coefficient in seconds
+                           CDRAG < 0. : drag coefficient in -(CDRAG) days
+  middle atmosphere only:
+
+  DAMHIH      REAL                                     T21    T31    T42    T63   T106
+                                                       ---    ---    ---    ---   ----
+                                                     1000.   100.   100.   100.   100.
+  
+  SPDRAG      REAL         upper sponge layer coefficient (sec)-1                    0.
+  ENSPODI     REAL         factor by which upper sponge layer coefficient is         1.
+                           increased from one level to next level above
+  NLVSPD1     INTEGER      last (uppermost) layer of upper sponge                    1
+  NLVSPD2     INTEGER      first (lowest) layer of upper sponge                      1
+   
+
+----PHYSCTL  (control options for diabatic processes) --------------------------------
+    =======
+  Name         Type          Purpose                                            Default
+  ----         ----          -------                                            -------
+
+  LPHYS       LOGICAL     True for parameterization of diabatic                    TRUE
+                          processes
+  LRAD        LOGICAL     True for radiation scheme                                TRUE
+  LVDIFF      LOGICAL     True for turbulent vertical diffusion                    TRUE
+  LCONV       LOGICAL     True for Cumulus convection (mass flux)                  TRUE
+  LMFPEN      LOGICAL     True if penetrative convetion is switched on             TRUE
+  LGWDRAG     LOGICAL     True for orographic gravity wave drag                    TRUE
+                                                                            T21:  FALSE
+  LCOND       LOGICAL     True for large scale condensation scheme                 TRUE
+  LSURF       LOGICAL     True for surface exchanges                               TRUE
+  LICE        LOGICAL     True for calculation of sea-ice temperature              TRUE
+  LCOVER      LOGICAL     True for prognostic cloud cover scheme                   TRUE
+  ICONV       INTEGER     Switch for convection scheme                               1
+                          iconv= 1 : Nordeng
+                          iconv= 2 : Tiedtke
+                          iconv= 3 : Hybrid
+
+
+----RADCTL  (control options for the radiation scheme as defined in mo_radiation) ----
+    ======
+  Name        Type         Purpose                                              Default
+  ----        ----         -------                                              -------
+
+  LDIUR       LOGICAL     True for diurnal cycle                                   TRUE
+  NMONTH      INTEGER     NMONTH = 0     : annual cycle                              0
+              Month for perpetual month experiments CURRENTLY NOT AVAILABLE
+                        NMONTH = 1..12 : number of month (Jan..Dec)
+                               (choose appropiate initial data !)
+  TRIGRAD     STRUCTURE   Frequency of full radiation computations 9,'steps','first',0
+  DIAGRAD     STRUCTURE   Print frequency for radiation statistics   5,'days','none',0
+  NRADPLA     INTEGER     Print radiation statistics every NRADPLA                   0
+                          latitude line
+  IRAD        INTEGER     irad selects the LW and SW configuration                   2
+                           in RADLSW, i.e.
+                          irad = 0 : radiation computation is switched off
+                          irad = 1 : ECHAM4  : JJM  + F&B2
+                          irad = 2 : ECHAM5  : RRTM + F&B4
+                          irad = 3 : MAECHAM5: RRTM + 3 near IR bands of F&B4 + L&C
+  IH2O        INTEGER     ih2o = 0 : no H2O in radiation computation, i.e.           1
+                              specific humidity = cloud water = cloud ice = 0
+                          ih2o = 1 : use prognostic specific humidity, 
+                                     cloud water and cloud ice
+  ICO2        INTEGER     ico2 = 0 : no CO2 in radiation computation                 2
+                          ico2 = 2 : uniform volume mixing ratio co2vmr
+  ICH4        INTEGER     ich4 = 0 : no CH4 in radiation computation                 2
+                          ich4 = 2 : uniform volume mixing ratio ch4vmr
+                          ich4 = 3 : volume mixing ratio ch4vmr variable
+                                     with elevation
+  IO3         INTEGER     io3  = 0 : no O3 in radiation computation                  3
+                          io3  = 2 : spectral climatology, as in  ECHAM4
+                          io3  = 3 : gridpoint climatology from NetCDF file
+  IN2O        INTEGER     in2o = 0 : no N2O in radiation computation                 2
+                          in2o = 2 : uniform volume mixing ratio n2ovmr
+                          in2o = 3 : volume mixing ratio n2ovmr variable
+                                     with elevation
+
+  ICFC        INTEGER     icfc = 0 : no CFCs in radiation computation                0
+                          icfc = 2 : uniform volume mixing ratios 
+                                     cfcvmr(1:16) for :
+                            CFC11     CFC12     HCFC113   CFC114
+                            CFC115    HCFC22    HCFC123   HCFC124
+                            HFC125    HFC134A   HCFC141B  HCFC142B
+                            HFC143A   HFC152A   CCL4      H3CCL3
+            !! the RRTM LW scheme currently consideres only CFC11 and CFC12 !!
+  IAERO       INTEGER     iaero= 0 : no aerosols in radiation computation            2
+                          iaero= 1 : transported GADS aerosols
+                          iaero= 2 : climatological Tanre aerosols
+                          iaero= 3 : transported GADS aerosols + 
+                                     climatological Tanre aerosols
+  NDFAER      INTEGER     definition array for GADS aerosols,                     12*0
+              ARRAY       active only if iaero=[1,3], 
+                          see mo_aero_gads for details
+  NEWAER      INTEGER     number of aerosol components specified in ndfaer           0
+  LGADSRH     LOGICAL     if true aerosol optical properties depend               FALSE
+                          on relative humidity, active only if 
+                          iaero=[1,3], see mo_aero_gads for details
+  CO2VMR      REAL        CO2 volume mixing ratio for ico2=2                   348.E-06
+  CH4VMR      REAL        CH4 volume mixing ratio for ich4=2                   1.65E-06
+  N2OVMR      REAL        N2O volume mixing ratio for in2o=2                   306.E-09
+  CFCVMR      REAL        CFC volume mixing ratios for icfc=2          see mo_radiation
+
+Generally for each component it holds:
+  - icomponent=0          : the component is disregarded
+  - icomponent=1          : the component is a transported field
+  - icomponent=2,...,k    : the component is given by a climatology of kind (k)
+
+
+
+--- GWSCTL  (control options for gravity waves as defined in mo_gwspectrum) -----------
+    ======
+  Name        Type         Purpose                                              Default
+  ----        ----         -------                                              -------
+
+  LEXTRO      LOGICAL     true for Hines gravity wave spectrum                     TRUE
+                               parameterization
+
+  LFRONT      LOGICAL     true for gravity waves from fronts                      FALSE
+
+  LOZPR       LOGICAL     true for source enhancement with precipitation          FALSE
+
+  IHEATCAL    INTEGER     switch for activating upper atmosphere processes           0
+                          iheatcal = 1: to calculate heating rates and
+                                        diffusion coefficient.
+                          iheatcal = 0  only momentum flux deposition
+
+  RMSCON      REAL        background rms gw wind (m/s) at emission level             1.
+
+  EMISS_LEV   INTEGER     number of levels above the ground at which                 7
+                          gravity waves are emitted
+
+  KSTAR       REAL        typical gravity wave horizontal wavenumber (1/m)    5.*1.e-5
+
+  M_MIN       REAL        minimum bound in vertical wavenumber (1/m)                 0.
+
+  RMS_FRONT   REAL        rms frontal gw wind at emission level (m/s)                2.
+
+  FRONT_THRES REAL        minimum value of the frontogenesis function for
+                          which gw are emitted from fronts [(K/m)^2/hour]
+                                                       T21    T31    T42    T63   T106
+                                                       ---    ---    ---    ---   ----
+                                                       inf    0.1    0.12   inf    inf
+
+
+  PCRIT       REAL        critical precipitation value (mm/d) above which           5.
+                          rms gw wind enhancement is applied
+
+  PCONS       REAL        adimensional factor for  background enhancement        4.75
+                          associated with precipitation
+
+ ---- POSTCTL   (control of prognostic variables write out) --------------------------
+      =======
+  Name          Type         Purpose                                            Default
+  ----          ----         -------                                            -------
+
+  LPPSPE        LOGICAL      True for write out of all prognostic                  TRUE
+                             variables except tracers
+  LPPD          LOGICAL      True for write out of divergence                      TRUE
+  LPPVO         LOGICAL      Idem for vorticity                                    TRUE
+  LPPT          LOGICAL      Idem for temperature                                  TRUE
+  LPPP          LOGICAL      Idem for surface pressure                             TRUE
+  LPPQ          LOGICAL      Idem for specific humidity                            TRUE
+  LPPXL         LOGICAL      Idem for cloud water content                          TRUE
+  LPPXI         LOGICAL      Idem for cloud ice content                            TRUE
+  LPPXVAR       LOGICAL      Idem for variance                                     TRUE
+  LPPXSKEW      LOGICAL      Idem for skewness                                     TRUE
+
+
+======================================================================================
+Nudging and NMI-Namelists (I. Kirchner 31-MAY-2001)
+======================================================================================
+
+---- NMICTL  - controls NMI ----------------------------------------------------------
+     ======
+  Name       Type         Purpose                                             Default
+  ----       ----         -------                                             -------
+
+  NTPRE       INTEGER     number of time steps skipped before                      2
+                          accumulation of tendencies 
+  NTDIA       INTEGER     number of accumulation time steps                        8
+                          for diabatic tendencies
+  NTITER      INTEGER     number of iteration time steps                           2
+  PCUT        REAL        cut off period for fast gravity                         12.
+                          modes in hours
+  PCUTD       REAL        cut off period for filtering of                          5.
+                          diabatic tendencies
+
+
+---- NDGCTL  - controls nudging options   --------------------------------------------
+     ======
+  Name       Type         Purpose                                             Default
+  ----       ----         -------                                             -------
+
+--- parameters defined in modules/mo_time_control.f90 ---
+
+  DT_NUDG_START(6)
+            INTEGER ARRAY  start nudging at that time (yr,mo,dy,hr,mi,se)     6*0
+
+  DT_NUDG_STOP(6)
+            INTEGER ARRAY  stop nudging at that time (yr,mo,dy,hr,mi,se)      6*0
+
+--- parameters defined in modules/mo_nudging_constants.f90 ---
+
+  LNUDGDBX    LOGICAL     switch more messages on (TRUE) or off (FALSE)         FALSE
+
+  LNUDGINI    LOGICAL     force the date adjustment given in the               FALSE
+			data nudging file
+			(LRESUME=F will force the adjustment)
+
+  LNUDGIMP    LOGICAL     switch between implicit (TRUE) and                    TRUE
+			explicit (FALSE) method
+
+  LNUDGFRD    LOGICAL     use NMI filter before (TRUE) or after (FALSE)         FALSE
+			the time interpolation of nudging data
+
+  LNUDGPAT    LOGICAL     switch between pattern nudging method (TRUE)          FALSE
+			and normal relaxation (FALSE)
+
+  LNUDGCLI    LOGICAL     use nudging data in climatological mode               FALSE
+			(TRUE) or not (FALSE)
+
+  LNUDGWOBS   LOGICAL     store interpolated nudging fields in output           FALSE
+			(TRUE) or not (FALSE)
+
+  LDAMPLIN    LOGICAL     linear (TRUE) or nonlinear (FALSE) time window        TRUE
+
+  NUDGDAMP    REAL        minimum weight (0 ... 1.0) for time window            1.0
+
+  NUDGDSIZE   REAL        influence radius at window boundaries (0 ... 0.5)     0.5
+
+  LTINTLIN    LOGICAL     linear (TRUE, 2 points) or cubic spline               TRUE
+			(FALSE, 4 points) time interpolation method
+
+                        nudging coefficients [* 0.00001/s] (NMAX=80) for
+  NUDGD(NMAX) REAL ARRAY  divergence                                           0.5787*80
+  NUDGV(NMAX) REAL ARRAY  vorticity                                            4.6296*80
+  NUDGT(NMAX) REAL ARRAY  temperature                                          1.1574*80
+  NUDGP       REAL        log surface pressure                                 1.1574*80
+
+  NUDGTRUN    INTEGER     truncation type selection                             0
+			1 use all zonal wave numbers
+			2 triangular cut off
+			3 triangular cut off except wave 0
+
+  NUDGSMIN    INTEGER     minimal nudged wave, special usage for wave 0         0
+			-1 nudge also global average
+			 0 nudge wave 0 except the global average
+
+  NUDGSMAX    INTEGER     maximal nudged wave                                   NM
+
+  NUDGLMIN    INTEGER     lowest level index (top) forced by nudging            1
+
+  NUDGLMAX    INTEGER     highest level index (bottom) forced by nudging        NLEV
+
+--- parameters defined in modules/mo_nudging_io.f90 ---
+
+      file names with optional place holders for time variables
+      ('%XN' 'X' means the placeholder and 'N' means the size which
+      will be used for expansion, see also modules/mo_filename.f90)
+
+			 X    meaning
+
+			y Y   year
+			m M   month
+			d D   day
+			h H   hour
+			i I   minute
+			s S   second
+			n N   file set number
+			
+  NDG_FILE_VOR CHARACTER(len=256)  vorticity data                               ""
+
+  NDG_FILE_DIV CHARACTER(len=256)  divergence data                              ""
+
+  NDG_FILE_STP CHARACTER(len=256)  temperature and log surface pressure         ""
+
+  NDG_FILE_RERUN CHARACTER(len=256) rerun file name                             ""
+
+--- parameters defined in modules/mo_nudging_sst.f90 ---
+
+  NDG_FREEZ   REAL        ice detection limit for SST field                    271.65
+
+  NSSTINC     INTEGER     SST update interval in hours (0 ... 24)              24
+                        0 means no external SST from nudging data
+			set is used, use standard model SST
+
+  NSSTOFF     INTEGER     day time for SST update (0 ... 23 UT)                12
+
+  NDG_FILE_SST CHARACTER(len=256)
+                        SST file name                                        ""

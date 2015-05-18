@@ -1,0 +1,30 @@
+
+  SCM Postprocessing Tools
+
+CONTENT
+
+  Fortran 90 Programs
+
+    post_1d.f90              Visualization tool based on gnuplot.
+    chvct.f90                Change vertical coordinates in forcing file
+    chua.f90                 convert forcing file:  unformatted <-> formatted
+    f2grads.f90              convert forcing file to grads binary+ctl file
+
+  Fortran 90 modules
+
+    mo_system.f90          define system routines
+                           (external or module subroutines)
+    mo_1d_io.f90           read or write the forcing file
+    ask_module.f90         manage dialog with user
+    unit_number_module.f90 Fortran unit number bookkeeping
+    mo_grads.f90           write grads files
+
+  Makefile                 Makefile
+  ab_ecmwf_32              Example vertical coefficient table (32 Levels)
+
+INSTALLATION
+
+  Fortran Programs:
+
+    Type 'make' within this directory. The executables 'post_1d', 'chvct',
+    and 'chua' will be placed in the ../../data directory

@@ -1,0 +1,422 @@
++ EXP=tbTt21
++ RERUN=.false.
++ LABORT=.true.
++ NCPUS=8
++ NPROCA=4
++ NPROCB=4
++ NTHREADS=1
++ NPROMA=16
++ RES=21
++ LEVELS=19
++ LAMIP=.true.
++ LMLO=.false.
++ YEARI=1986
++ YEARF=1992
++ WORK_DIR=/pf/b/b380035/echam-5.4.02
++ SCRIPTDIR=/pf/b/b380035/echam-5.4.02/run
++ EXPDIR=/work/scratch/b/b380035/tbTt21
++ INITIAL_DATA=/pf/b/b380035/T21
++ BOUNDARY_DATA=/pf/b/b380035/T21/amip2
++ MODEL=/pf/b/b380035/echam-5.4.02/bin/echam5
++ [ ! -d /work/scratch/b/b380035/tbTt21 ]
++ cd /work/scratch/b/b380035/tbTt21
++ rm -f unit.20 unit.21 unit.23 unit.24 unit.90 unit.91 unit.92 unit.96 sst1985 sst1986 sst1987 sst1988 sst1989 sst1990 sst1991 sst1992 ice1985 ice1986 ice1987 ice1988 ice1989 ice1990 ice1991 ice1992 hdpara.nc hdstart.nc rrtadata
++ ln -sf /pf/b/b380035/T21/T21L19_jan_spec.nc unit.23
++ ln -sf /pf/b/b380035/T21/T21_jan_surf.nc unit.24
++ ln -sf /pf/b/b380035/T21/T21_O3clim2.nc unit.21
++ ln -sf /pf/b/b380035/T21/T21_VLTCLIM.nc unit.90
++ ln -sf /pf/b/b380035/T21/T21_VGRATCLIM.nc unit.91
++ ln -sf /pf/b/b380035/T21/T21_TSLCLIM2.nc unit.92
++ ln -sf /pf/b/b380035/T21/surrta_data rrtadata
++ ln -sf /pf/b/b380035/T21/hdpara.nc hdpara.nc
++ ln -sf /pf/b/b380035/T21/hdstart.nc hdstart.nc
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_clim.nc unit.20
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_clim.nc unit.96
++ years='1985 1986 1986 1987 1988 1989'
++ years='1985 1986 1986 1987 1988 1989 1990 1991 1992'
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1985.nc sst1985
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1985.nc ice1985
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1986.nc sst1986
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1986.nc ice1986
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1986.nc sst1986
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1986.nc ice1986
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1987.nc sst1987
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1987.nc ice1987
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1988.nc sst1988
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1988.nc ice1988
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1989.nc sst1989
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1989.nc ice1989
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1990.nc sst1990
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1990.nc ice1990
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1991.nc sst1991
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1991.nc ice1991
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sst_1992.nc sst1992
++ ln -sf /pf/b/b380035/T21/amip2/T21_amip2sic_1992.nc ice1992
++ cat
++ 1> namelist.echam 0<< \EOF
+&runctl
+  out_datapath = "/work/scratch/b/b380035/tbTt21/"
+  out_expname  = "tbTt21"
+  out_filetype = 2                  ! 1 - GRIB1, 2 - netCDF
+  lresume      = .false.
+  lamip        = .true.
+  lmlo	       = .false.
+  labort       = .true.
+  dt_start     = 1986,01,01,12,0,0
+  dt_stop      = 1992,12,31,12,0,0
+  putdata      = 6, 'hours', 'first', 0
+  putrerun     = 10, 'days', 'last', 0
+  nproma       = 16 
+  nproca       = 4
+  nprocb       = 4
+/
+EOF
++ poe /pf/b/b380035/echam-5.4.02/bin/echam5
+ATTENTION: 0031-408  16 tasks allocated by Resource Manager, continuing...
+
+ echam5 MPI interface runtime information:
+  Run on   16 processors.
+  Used MPI version: 2.1
+ Read date (initial/restart):  1. Jan     1989 12:00:00
+  Basic initialization of time manager <echam time manager> done.
+ Start date replaced by namelist start date:  1. Jan     1986 12:00:00
+ Time step and start date evaluation done.
+  Initial state of time manager <echam time manager> is locked now!
+  State of manager >>echam time manager<<
+   Step counter :  0
+   Time step [s]:  2400.00000000000000
+  Initial date:  1. Jan     1986 12:00:00
+  Current date:  1. Jan     1986 12:00:00
+
+ Using DT_STOP for model stop.
+ Stop experiment at: 31. Dec     1992 12:00:00
+ Previous date:  1. Jan     1986 11:20:00
+ Next date    :  1. Jan     1986 12:40:00
+
+  Event <rerun interval> : interval  10  days : adjustment last : offset[sec]  0
+ No time stepping mismatch check defined for MONTHS and YEARS.
+  Event <rebuild file names> : interval  1  months : adjustment first : offset[sec]  0
+  Event <output interval> : interval  6  hours : adjustment first : offset[sec]  0
+  Event <couple get-from-ocean> : interval  1  days : adjustment exact : offset[sec]  0
+  Event <couple put-to-ocean> : interval  1  days : adjustment exact : offset[sec]  0
+  Event <couple get-from-hd> : interval  1  days : adjustment exact : offset[sec]  0
+  Event <couple put-to-hd> : interval  1  days : adjustment exact : offset[sec]  0
+  Event <radiation computation> : interval  2  hours : adjustment first : offset[sec]  0
+  Event <radiation diagnostics> : interval  5  days : adjustment exact : offset[sec]  0
+  Event <AMIP2 table 4 diagnostics> : interval  1  days : adjustment exact : offset[sec]  0
+  Event <dynamical diagnostics> : interval  5  days : adjustment exact : offset[sec]  0
+  Event <vertical dyn-diag> : interval  5  days : adjustment exact : offset[sec]  0
+
+ readsst:  fn0: sst1985 fn1: sst1986 fn2: sst1987 nist:  20
+ This is an AMIP run (lamip = .true.).
+  Reading sst from files sst1985, sst1986, sst1987
+ readice:  fn0: ice1985 fn1: ice1986 fn2: ice1987 nice:  96
+ This is an AMIP run (lamip = .true.).
+  Reading ice from files ice1985, ice1986, ice1987
+ stepon: Start Integration loop timer ...
+ Radiation calculated for :  1. Jan     1986 13:00:00
+  PE   0 stepon:          1   285.7656405917188 K
+  PE   0 stepon:          1     0.140 s
+  PE   0 stepon:          2   285.8112081633217 K
+  PE   0 stepon:          2     0.020 s
+  PE   0 stepon:          3   285.6726727631076 K
+  PE   0 stepon:          3     0.030 s
+ Radiation calculated for :  1. Jan     1986 15:00:00
+  PE   0 stepon:          4   285.4706844890026 K
+  PE   0 stepon:          4     0.120 s
+  PE   0 stepon:          5   285.3689420808330 K
+  PE   0 stepon:          5     0.030 s
+  PE   0 stepon:          6   285.2711796597475 K
+  PE   0 stepon:          6     0.020 s
+ Radiation calculated for :  1. Jan     1986 17:00:00
+  PE   0 stepon:          7   285.2677820786186 K
+  PE   0 stepon:          7     0.130 s
+  PE   0 stepon:          8   285.1902299880003 K
+  PE   0 stepon:          8     0.020 s
+ Write netCDF output for :  1. Jan     1986 18:00:00
+  PE   0 stepon:          9   285.1431962967678 K
+  PE   0 stepon:          9     0.220 s
+ Radiation calculated for :  1. Jan     1986 19:00:00
+  PE   0 stepon:         10   285.1092146041391 K
+  PE   0 stepon:         10     0.130 s
+  PE   0 stepon:         11   285.0715665020385 K
+  PE   0 stepon:         11     0.020 s
+  PE   0 stepon:         12   285.0308364332153 K
+  PE   0 stepon:         12     0.030 s
+ Radiation calculated for :  1. Jan     1986 21:00:00
+  PE   0 stepon:         13   284.9686007835573 K
+  PE   0 stepon:         13     0.120 s
+  PE   0 stepon:         14   284.9415605227956 K
+  PE   0 stepon:         14     0.020 s
+  PE   0 stepon:         15   284.8898466938579 K
+  PE   0 stepon:         15     0.030 s
+ Radiation calculated for :  1. Jan     1986 23:00:00
+  PE   0 stepon:         16   284.8318271841444 K
+  PE   0 stepon:         16     0.120 s
+  PE   0 stepon:         17   284.7934836316061 K
+  PE   0 stepon:         17     0.020 s
+ Write netCDF output for :  2. Jan     1986 00:00:00
+  PE   0 stepon:         18   284.7436794387185 K
+  PE   0 stepon:         18     0.050 s
+ Radiation calculated for :  2. Jan     1986 01:00:00
+  PE   0 stepon:         19   284.7331158977761 K
+  PE   0 stepon:         19     0.130 s
+  PE   0 stepon:         20   284.6902766558864 K
+  PE   0 stepon:         20     0.020 s
+  PE   0 stepon:         21   284.6848523897555 K
+  PE   0 stepon:         21     0.020 s
+ Radiation calculated for :  2. Jan     1986 03:00:00
+  PE   0 stepon:         22   284.7059913689511 K
+  PE   0 stepon:         22     0.130 s
+  PE   0 stepon:         23   284.7242649897444 K
+  PE   0 stepon:         23     0.020 s
+  PE   0 stepon:         24   284.7541571462468 K
+  PE   0 stepon:         24     0.020 s
+ Radiation calculated for :  2. Jan     1986 05:00:00
+  PE   0 stepon:         25   284.8229489976779 K
+  PE   0 stepon:         25     0.130 s
+  PE   0 stepon:         26   284.8635666307540 K
+  PE   0 stepon:         26     0.020 s
+ Write netCDF output for :  2. Jan     1986 06:00:00
+  PE   0 stepon:         27   284.9228626945886 K
+  PE   0 stepon:         27     0.040 s
+ Radiation calculated for :  2. Jan     1986 07:00:00
+  PE   0 stepon:         28   285.0008806224248 K
+  PE   0 stepon:         28     0.130 s
+  PE   0 stepon:         29   285.0489247615770 K
+  PE   0 stepon:         29     0.020 s
+  PE   0 stepon:         30   285.1041181649414 K
+  PE   0 stepon:         30     0.020 s
+ Radiation calculated for :  2. Jan     1986 09:00:00
+  PE   0 stepon:         31   285.1331290931512 K
+  PE   0 stepon:         31     0.130 s
+  PE   0 stepon:         32   285.1497883400014 K
+  PE   0 stepon:         32     0.030 s
+  PE   0 stepon:         33   285.1337570433187 K
+  PE   0 stepon:         33     0.020 s
+ Radiation calculated for :  2. Jan     1986 11:00:00
+  PE   0 stepon:         34   285.1668713208749 K
+  PE   0 stepon:         34     0.130 s
+  PE   0 stepon:         35   285.1692406462041 K
+  PE   0 stepon:         35     0.020 s
+ Write netCDF output for :  2. Jan     1986 12:00:00
+  PE   0 stepon:         36   285.1651618233370 K
+  PE   0 stepon:         36     0.040 s
+ Radiation calculated for :  2. Jan     1986 13:00:00
+  PE   0 stepon:         37   285.1812161774573 K
+  PE   0 stepon:         37     0.130 s
+  PE   0 stepon:         38   285.1591024555773 K
+  PE   0 stepon:         38     0.020 s
+  PE   0 stepon:         39   285.1535342380342 K
+  PE   0 stepon:         39     0.030 s
+ Radiation calculated for :  2. Jan     1986 15:00:00
+  PE   0 stepon:         40   285.0966117259396 K
+  PE   0 stepon:         40     0.130 s
+  PE   0 stepon:         41   285.0707397539803 K
+  PE   0 stepon:         41     0.020 s
+  PE   0 stepon:         42   285.0348909841833 K
+  PE   0 stepon:         42     0.020 s
+ Radiation calculated for :  2. Jan     1986 17:00:00
+  PE   0 stepon:         43   285.0065363393223 K
+  PE   0 stepon:         43     0.130 s
+  PE   0 stepon:         44   284.9797620340556 K
+  PE   0 stepon:         44     0.020 s
+ Write netCDF output for :  2. Jan     1986 18:00:00
+  PE   0 stepon:         45   284.9386515272018 K
+  PE   0 stepon:         45     0.050 s
+ Radiation calculated for :  2. Jan     1986 19:00:00
+  PE   0 stepon:         46   284.9371211237312 K
+  PE   0 stepon:         46     0.130 s
+  PE   0 stepon:         47   284.8992447760679 K
+  PE   0 stepon:         47     0.020 s
+  PE   0 stepon:         48   284.8668120881132 K
+  PE   0 stepon:         48     0.020 s
+ Radiation calculated for :  2. Jan     1986 21:00:00
+  PE   0 stepon:         49   284.8139360164001 K
+  PE   0 stepon:         49     0.130 s
+  PE   0 stepon:         50   284.7817961808773 K
+  PE   0 stepon:         50     0.010 s
+  PE   0 stepon:         51   284.7337830872739 K
+  PE   0 stepon:         51     0.020 s
+ Radiation calculated for :  2. Jan     1986 23:00:00
+  PE   0 stepon:         52   284.6968130896931 K
+  PE   0 stepon:         52     0.130 s
+  PE   0 stepon:         53   284.6690841559133 K
+  PE   0 stepon:         53     0.030 s
+ Write netCDF output for :  3. Jan     1986 00:00:00
+  PE   0 stepon:         54   284.6331414857767 K
+  PE   0 stepon:         54     0.040 s
+ Radiation calculated for :  3. Jan     1986 01:00:00
+  PE   0 stepon:         55   284.6189556787654 K
+  PE   0 stepon:         55     0.130 s
+  PE   0 stepon:         56   284.5935658842751 K
+  PE   0 stepon:         56     0.020 s
+  PE   0 stepon:         57   284.5889869952383 K
+  PE   0 stepon:         57     0.020 s
+ Radiation calculated for :  3. Jan     1986 03:00:00
+  PE   0 stepon:         58   284.6493423880525 K
+  PE   0 stepon:         58     0.130 s
+  PE   0 stepon:         59   284.6512405618977 K
+  PE   0 stepon:         59     0.020 s
+  PE   0 stepon:         60   284.6902661106457 K
+  PE   0 stepon:         60     0.030 s
+ Radiation calculated for :  3. Jan     1986 05:00:00
+  PE   0 stepon:         61   284.7535250161479 K
+  PE   0 stepon:         61     0.130 s
+  PE   0 stepon:         62   284.8023378356500 K
+  PE   0 stepon:         62     0.020 s
+ Write netCDF output for :  3. Jan     1986 06:00:00
+  PE   0 stepon:         63   284.8537496085609 K
+  PE   0 stepon:         63     0.040 s
+ Radiation calculated for :  3. Jan     1986 07:00:00
+  PE   0 stepon:         64   284.9384376195952 K
+  PE   0 stepon:         64     0.130 s
+  PE   0 stepon:         65   284.9764265109516 K
+  PE   0 stepon:         65     0.020 s
+  PE   0 stepon:         66   285.0079913416456 K
+  PE   0 stepon:         66     0.040 s
+ Radiation calculated for :  3. Jan     1986 09:00:00
+  PE   0 stepon:         67   285.0333256525020 K
+  PE   0 stepon:         67     0.130 s
+  PE   0 stepon:         68   285.0437346031684 K
+  PE   0 stepon:         68     0.020 s
+  PE   0 stepon:         69   285.0373968642643 K
+  PE   0 stepon:         69     0.020 s
+ Radiation calculated for :  3. Jan     1986 11:00:00
+  PE   0 stepon:         70   285.0545112765336 K
+  PE   0 stepon:         70     0.130 s
+  PE   0 stepon:         71   285.0630397151736 K
+  PE   0 stepon:         71     0.030 s
+ Write netCDF output for :  3. Jan     1986 12:00:00
+  PE   0 stepon:         72   285.0697336056153 K
+  PE   0 stepon:         72     0.040 s
+ Radiation calculated for :  3. Jan     1986 13:00:00
+  PE   0 stepon:         73   285.0675135869815 K
+  PE   0 stepon:         73     0.130 s
+ Radiation calculated for :  3. Jan     1986 15:00:00
+ Radiation calculated for :  3. Jan     1986 17:00:00
+ Write netCDF output for :  3. Jan     1986 18:00:00
+ Radiation calculated for :  3. Jan     1986 19:00:00
+ Radiation calculated for :  3. Jan     1986 21:00:00
+ Radiation calculated for :  3. Jan     1986 23:00:00
+ Write netCDF output for :  4. Jan     1986 00:00:00
+ Radiation calculated for :  4. Jan     1986 01:00:00
+ Radiation calculated for :  4. Jan     1986 03:00:00
+ Radiation calculated for :  4. Jan     1986 05:00:00
+ Write netCDF output for :  4. Jan     1986 06:00:00
+ Radiation calculated for :  4. Jan     1986 07:00:00
+ Radiation calculated for :  4. Jan     1986 09:00:00
+ Radiation calculated for :  4. Jan     1986 11:00:00
+ Write netCDF output for :  4. Jan     1986 12:00:00
+ Radiation calculated for :  4. Jan     1986 13:00:00
+ Radiation calculated for :  4. Jan     1986 15:00:00
+ Radiation calculated for :  4. Jan     1986 17:00:00
+ Write netCDF output for :  4. Jan     1986 18:00:00
+ Radiation calculated for :  4. Jan     1986 19:00:00
+ Radiation calculated for :  4. Jan     1986 21:00:00
+ Radiation calculated for :  4. Jan     1986 23:00:00
+ Write netCDF output for :  5. Jan     1986 00:00:00
+ Radiation calculated for :  5. Jan     1986 01:00:00
+ Radiation calculated for :  5. Jan     1986 03:00:00
+ Radiation calculated for :  5. Jan     1986 05:00:00
+ Write netCDF output for :  5. Jan     1986 06:00:00
+ Radiation calculated for :  5. Jan     1986 07:00:00
+ Radiation calculated for :  5. Jan     1986 09:00:00
+ Radiation calculated for :  5. Jan     1986 11:00:00
+ Write netCDF output for :  5. Jan     1986 12:00:00
+ Radiation calculated for :  5. Jan     1986 13:00:00
+ Radiation calculated for :  5. Jan     1986 15:00:00
+ Radiation calculated for :  5. Jan     1986 17:00:00
+ Write netCDF output for :  5. Jan     1986 18:00:00
+ Radiation calculated for :  5. Jan     1986 19:00:00
+ Radiation calculated for :  5. Jan     1986 21:00:00
+ Radiation calculated for :  5. Jan     1986 23:00:00
+ Write netCDF output for :  6. Jan     1986 00:00:00
+ Radiation calculated for :  6. Jan     1986 01:00:00
+ Radiation calculated for :  6. Jan     1986 03:00:00
+ Radiation calculated for :  6. Jan     1986 05:00:00
+ Write netCDF output for :  6. Jan     1986 06:00:00
+ Radiation calculated for :  6. Jan     1986 07:00:00
+ Radiation calculated for :  6. Jan     1986 09:00:00
+ Radiation calculated for :  6. Jan     1986 11:00:00
+ Write netCDF output for :  6. Jan     1986 12:00:00
+ Radiation calculated for :  6. Jan     1986 13:00:00
+ Radiation calculated for :  6. Jan     1986 15:00:00
+ Radiation calculated for :  6. Jan     1986 17:00:00
+ Write netCDF output for :  6. Jan     1986 18:00:00
+ Radiation calculated for :  6. Jan     1986 19:00:00
+ Radiation calculated for :  6. Jan     1986 21:00:00
+ Radiation calculated for :  6. Jan     1986 23:00:00
+ Write netCDF output for :  7. Jan     1986 00:00:00
+ Radiation calculated for :  7. Jan     1986 01:00:00
+ Radiation calculated for :  7. Jan     1986 03:00:00
+ Radiation calculated for :  7. Jan     1986 05:00:00
+ Write netCDF output for :  7. Jan     1986 06:00:00
+ Radiation calculated for :  7. Jan     1986 07:00:00
+ Radiation calculated for :  7. Jan     1986 09:00:00
+ Radiation calculated for :  7. Jan     1986 11:00:00
+ Write netCDF output for :  7. Jan     1986 12:00:00
+ Radiation calculated for :  7. Jan     1986 13:00:00
+ Radiation calculated for :  7. Jan     1986 15:00:00
+ Radiation calculated for :  7. Jan     1986 17:00:00
+ Write netCDF output for :  7. Jan     1986 18:00:00
+ Radiation calculated for :  7. Jan     1986 19:00:00
+ Radiation calculated for :  7. Jan     1986 21:00:00
+ Radiation calculated for :  7. Jan     1986 23:00:00
+ Write netCDF output for :  8. Jan     1986 00:00:00
+ Radiation calculated for :  8. Jan     1986 01:00:00
+ Radiation calculated for :  8. Jan     1986 03:00:00
+ Radiation calculated for :  8. Jan     1986 05:00:00
+ Write netCDF output for :  8. Jan     1986 06:00:00
+ Radiation calculated for :  8. Jan     1986 07:00:00
+ Radiation calculated for :  8. Jan     1986 09:00:00
+ Radiation calculated for :  8. Jan     1986 11:00:00
+ Write netCDF output for :  8. Jan     1986 12:00:00
+ Radiation calculated for :  8. Jan     1986 13:00:00
+ Radiation calculated for :  8. Jan     1986 15:00:00
+ Radiation calculated for :  8. Jan     1986 17:00:00
+ Write netCDF output for :  8. Jan     1986 18:00:00
+ Radiation calculated for :  8. Jan     1986 19:00:00
+ Radiation calculated for :  8. Jan     1986 21:00:00
+ Radiation calculated for :  8. Jan     1986 23:00:00
+ Write netCDF output for :  9. Jan     1986 00:00:00
+ Radiation calculated for :  9. Jan     1986 01:00:00
+ Radiation calculated for :  9. Jan     1986 03:00:00
+ Radiation calculated for :  9. Jan     1986 05:00:00
+ Write netCDF output for :  9. Jan     1986 06:00:00
+ Radiation calculated for :  9. Jan     1986 07:00:00
+ Radiation calculated for :  9. Jan     1986 09:00:00
+ Radiation calculated for :  9. Jan     1986 11:00:00
+ Write netCDF output for :  9. Jan     1986 12:00:00
+ Radiation calculated for :  9. Jan     1986 13:00:00
+ Radiation calculated for :  9. Jan     1986 15:00:00
+ Radiation calculated for :  9. Jan     1986 17:00:00
+ Write netCDF output for :  9. Jan     1986 18:00:00
+ Radiation calculated for :  9. Jan     1986 19:00:00
+ Radiation calculated for :  9. Jan     1986 21:00:00
+ Radiation calculated for :  9. Jan     1986 23:00:00
+ Write netCDF output for : 10. Jan     1986 00:00:00
+ Radiation calculated for : 10. Jan     1986 01:00:00
+ Radiation calculated for : 10. Jan     1986 03:00:00
+ Radiation calculated for : 10. Jan     1986 05:00:00
+ Write netCDF output for : 10. Jan     1986 06:00:00
+ Radiation calculated for : 10. Jan     1986 07:00:00
+ Radiation calculated for : 10. Jan     1986 09:00:00
+ Radiation calculated for : 10. Jan     1986 11:00:00
+ Write netCDF output for : 10. Jan     1986 12:00:00
+ Radiation calculated for : 10. Jan     1986 13:00:00
+ Radiation calculated for : 10. Jan     1986 15:00:00
+ Radiation calculated for : 10. Jan     1986 17:00:00
+ Write netCDF output for : 10. Jan     1986 18:00:00
+ Radiation calculated for : 10. Jan     1986 19:00:00
+ Radiation calculated for : 10. Jan     1986 21:00:00
+ Radiation calculated for : 10. Jan     1986 23:00:00
+ Interrupt model, last prognostic date/time is: 10. Jan     1986 23:20:00
+
+  Wallclock        :      23.59 s
+  CPU-time (user)  :      21.34 s
+  CPU-time (system):       0.21 s
+  Ratio            :      91.37 %
+
+ Experiment stopped.
++ exit

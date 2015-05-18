@@ -1,0 +1,66 @@
+# AMD64/EMT64/Linux
+#
+
+#-----------------------------------------------------------------------------
+# Intel ifort 10.1/OPenMPI 1.2.5
+#
+F90      = ifort 
+FFLAGS   = -mieee-fp -O3 -ip -g 
+F90FLAGS = -mieee-fp -O3 -ip -g -fpp -DHAVE_LIBNETCDF64
+LIBS     = -L../lib -lsupport -L/opt/bwgrid/numlib/lapack/3.3.1/lib -llapack -lblas -L/opt/bwgrid/lib/netcdf/lib-netcdf-4.2.1.1_c-openmpi-1.4.3-gnu-4.1/lib -lnetcdf -L/opt/bwgrid/lib/netcdf/lib-netcdf-4.2_fortran-openmpi-1.4.3-gnu-4.1/lib -lnetcdff -L/opt/bwgrid/compiler/intel/cs_2011.5.220/composerxe-2011.5.220/compiler/lib/intel64/ -limf -lm
+SRCDIRS  =
+MPIROOT  = /opt/bwgrid/mpi/openmpi/1.4.3-intel-12.0
+#
+ARCH       = LINUX
+#
+MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal 
+#-L/usr/local/ofed/lib64 -libverbs -lrt -lnuma -ldl -lnsl -#lutil -lpthread
+#
+NETCDFROOT = /home-link/epifm01/NETCDFROOTsymbolic
+#NETCDFROOT = /home-link/epifm01/netcdf
+#
+#LIBNETCDF=/opt/bwgrid/lib/netcdf/lib-netcdf-4.2_fortran-openmpi-1.4.3-gnu-4.1/lib
+#INCNETCDF=/opt/bwgrid/lib/netcdf/lib-netcdf-4.2.1.1_c-openmpi-1.4.3-gnu-4.1/include
+#
+CC       = icc 
+#gcc
+CFLAGS   = -O -DpgiFortran
+#
+DEFOPT   = -D
+MODOPT   = -I
+#
+# 
+################### END OF CONFIGURATION ################### 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#-----------------------------------------------------------------------------
+# PGI
+#
+#F90      = pgf95
+#FFLAGS   = -O3 -Kieee -fastsse -Mnontemporal -Mnorecursive -Mextend -Mpreprocess -tp amd64e
+#F90FLAGS = -O3 -Kieee -fastsse -Mnontemporal -Mnorecursive -Mextend -Mpreprocess -tp amd64e #-DHAVE_LIBNETCDF64
+#LIBS     = -L../lib -lsupport  -Bstatic -L/sw/sles9-x64/acml-3.6.0/pgi64/lib -lacml -#lacml_mv -Bdynamic
+#SRCDIRS  =
+#MPIROOT  = /home-link/epifm01/openmpi
+#
+#ARCH       = LINUX
+#
+#MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -L/usr/local/ofed/lib64 -#libverbs -lrt -lnuma -ldl -lnsl -lutil -lpthread
+#
+#NETCDFROOT = /home-link/epifm01/netcdf
+#
+#CC       = gcc
+#CFLAGS   = -O -DpgiFortran
+#
+#DEFOPT   = -D
+#MODOPT   = -I

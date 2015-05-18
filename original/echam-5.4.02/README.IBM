@@ -1,0 +1,82 @@
+IBM power systems are supported by echam5. 
+
+The automatic setup is following the ECMWF site settings for xlf as 
+are the general usage of 64 bit addressing and underscores appended 
+for the Fortran - C interface.
+
+There has been a port to BlueGene/L by IBM. In case you are interested
+contact luis.kornblueh@zmaw.de.
+
+To speed up the configure run set the following environment variables:
+
+export CONFIG_SHELL=/opt/freeware/bin/bash
+export CONFIG_ENV_ARGS=/opt/freeware/bin/bash
+
+In case yours IBM setup is following the standard IBM setting some 
+additional corrections in the Makefile have to be done:
+
+- remove -Dextname from the CFLAGS
+- remove -qextname from FFLAGS and F90FLAGS
+- add "-brename:.flush,.flush_" to LDFLAGS
+  (proposed by C. Pospich, IBM and S. Schroeder, FZ Juelich)
+
+Two drawbacks with respect to the automatic setup:
+
+1) Setting of two environment variables is required before calling configure.
+
+   csh usage:
+
+   setenv FORT_INTEGER_LEN 4
+   setenv FORT_REAL_LEN 8
+
+   sh/ksh usage:
+
+   FORT_INTEGER_LEN=4
+   export FORT_INTEGER_LEN
+
+   FORT_REAL_LEN=8
+   export FORT_REAL_LEN
+
+2) The missing possibility of explicitly linking MPI is introducing some
+   inconvenience. 
+
+   After running configure in the Makefile the preprocessor directive
+   NOMPI has to be removed (delete -Wf,-DNOMPI) from the F90FLAGS and
+   the LDFLAGS.
+
+With respect to running the model is recommended for the standard version 
+of echam5 a NPROMA=11 for pwr4/pwr4+, for pwr5/pwr5+ NPROMA=72.  
+
+Latest tested compiler/software set:
+
+AIX 5.3
+POE 4.2.2.8
+LAPI 2.4.3.0
+XL Fortran Compiler 9.1.0.0
+XL C Compiler       7.0.0.0
+
+Running with OpenMP is currently (July 2007) not possible. Despite of this
+some consoderations came up:
+
+# This section is not working properly as stated by IBM (C. Pospiech)
+#
+# @ environment          = MEMORY_AFFINITY=MCM; \
+#                          MP_SHARED_MEMORY=yes; MP_WAIT_MODE=poll; \
+#                          MP_SINGLE_THREAD=yes; MP_TASK_AFFINITY=MCM; \
+#                          OMP_NUM_THREADS=4
+#
+# propsed to replace with this, but didn't work at ECMWF
+#
+# @ rset                 = rset_mcm_affinity
+# @ mcm_affinity_options = mcm_distribute mcm_mem_req mcm_sni_none
+
+ ECMWF recommendation:
+
+  - add to LIB in the Makefile:
+    LIB      = -L/usr/local/lib/eclib -lecsmp.LP64.R32.D64.I32
+
+  - for runtime you need to add in the script:
+    export EC_BIND="0 16 1 17 2 18 3 19 4 20 5 21 6 22 7 23 8 24 9 25 
+                    10 26 11 27 12 28 13 29 14 30 15 31"
+
+Any comments are welcome: luis.kornblueh@zmaw.de, uwe.schulzweida@zmaw.de

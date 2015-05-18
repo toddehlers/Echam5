@@ -1,0 +1,8 @@
+mo_transpose.f90: major rewrite of transposition kernels reducing allocates
+                  and implementing different communication possibilites:
+                  1) MPI 2 based put, get
+                  2) all to all communication calls
+
+mo_tpcore.f90:    add changes by Thomas Diehl, NASA GSFC
+    
+Luis Kornblueh, 2005-11-10

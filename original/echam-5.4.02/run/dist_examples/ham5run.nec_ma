@@ -1,0 +1,135 @@
+#! /bin/ksh
+#PBS -l cpunum_prc=4           # number of processors
+#PBS -l cputim_job=16:00:00    # run time
+####PBS -l memsz_job=4096mb       # Memory per node
+#PBS -j o                      # join err and out to out
+#PBS -N hEEEEE # job name
+#PBS -S /bin/ksh               # NQSII Synatx to set the shell
+#PBS -M email
+################################################################################
+#
+# VERSION FOR NEC-SX6
+set -ex
+#
+# Job file to run echam model on NEC-SX6
+# ======================================
+#
+# experiment identifier (replace EEEEE with your m2140XX and a three digit
+# number for the current experiment (NNN), TTTT replace by some text
+# EXP=EEEEETTTT (see as well above for the job names)
+# For your useraccount the notation UUUUUUU resp. U/UUUUUUU is used.
+#
+EXP=EEEEETTTT           # experiment identifier
+#
+DAT=$UTF/runNNN
+DPATH=$WRKSHR/runNNN/
+#
+F_RECLUNIT=BYTE ; export F_RECLUNIT
+export MPIPROGINF=ALL_DETAIL
+export F_PROGINF=DETAIL
+#
+export MPIMULTITASKMIX=ON
+F_SYSLEN=600 ; export F_SYSLEN
+#
+NCPUS=1  
+NPROCA=1
+NPROCB=1
+NTHREADS=4
+#NTHREADS=4
+#
+RES=31
+LEV=39
+#
+RERUN=.false.           # Rerun switch; .false. for initial run, .true. for
+#
+hostname
+################################################################################
+#
+cd $DPATH                          # output and rerun files are written into $DPATH
+#
+MODEL=/ipf/U/UUUUUUU/echam5.4.00/bin/echam5  # <--- directory where the executable is stored
+#
+INI=/pool/ECHAM5/T${RES}
+INIAMIP=/pool/ECHAM5/T${RES}/amip2
+#
+################################################################################
+#
+# specification of file structures
+#
+# stop execution after the first run time error
+F_ERRCNT=0
+export F_ERRCNT
+#
+################################################################################
+#
+rm -f unit.?? sst* ice* rrtadata *.codes atmout
+#
+ln -s  ${INI}/T${RES}L${LEV}_jan_spec.nc          unit.23
+ln -s  ${INI}/T${RES}_jan_surf.nc             unit.24
+################################################################################
+## for climatological sst and ice (LAMIP=F) use:
+#ln -s  ${INIAMIP}/T${RES}_amip2sst_clim.nc    unit.20
+#ln -s  ${INIAMIP}/T${RES}_amip2sic_clim.nc    unit.96
+##
+# for AMIP (variable) sst and ice (LAMIP=T) use:
+for yrs in 1977 1978 1979 1980 1981 1982 1983 1984 1985 1986 1987 1988
+do
+ln -s  ${INIAMIP}/T${RES}_amip2sst_${yrs}.nc  sst${yrs}
+ln -s  ${INIAMIP}/T${RES}_amip2sic_${yrs}.nc  ice${yrs}
+done
+#
+################################################################################
+#
+ln -s  ${INI}/T${RES}_O3clim2.nc    unit.21
+ln -s  ${INI}/T${RES}_VLTCLIM.nc    unit.90
+ln -s  ${INI}/T${RES}_VGRATCLIM.nc  unit.91
+ln -s  ${INI}/T${RES}_TSLCLIM2.nc   unit.92
+ln -s  ${INI}/surrta_data       rrtadata
+#
+################################################################################
+#  namelist control variables and output control for grid variables
+#  spectral variables are written out by default except liq. water
+#  for production runs set LABORT=.FALSE.
+#
+cat > namelist.echam << EOF
+&RUNCTL
+  LRESUME=$RERUN,
+ out_datapath = "$DPATH"
+ out_expname  = "$EXP"
+  DT_START  = 1978,01,01,12,0,0
+  DT_STOP   = 2000,01,06,01,0,0
+  PUTDATA   = 6,'hours','first',0
+  LAMIP=T,
+  LMIDATM=.true
+  LABORT=T,
+  NPROCA=${NPROCA}
+  NPROCB=${NPROCB}
+  NPROMA=512
+/
+&DYNCTL
+  VCHECK=235.
+  SPDRAG=0.926E-4
+/
+&RADCTL
+  ICH4=3
+  IN2O=3
+/
+EOF
+#
+#cp $DAT/job1 .
+#
+export ECHAM5_THREADS=$NTHREADS
+#
+mpirun -np $NCPUS $MODEL
+#
+#rm -f *.codes
+#qsub subjob1
+################################################################################
+##
+##        change the rerun switch before resubmitting the modeljob
+#cd $DAT
+##
+#qsub ham5run.nec
+##
+exit
+################################################################################

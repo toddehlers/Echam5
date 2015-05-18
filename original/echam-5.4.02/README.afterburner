@@ -1,0 +1,12 @@
+2005-11-30
+
+We have removed the afterburner from the echam5 distribution.
+The main reason is that usually more frequent updates for the
+afterburner are required than for the model.
+
+Please download the latest afterburner from:
+
+ 
+http://www.mpimet.mpg.de/~afterburner/
+
+In case of questions contact Uwe Schulzweida (schulzweida@dkrz.de).

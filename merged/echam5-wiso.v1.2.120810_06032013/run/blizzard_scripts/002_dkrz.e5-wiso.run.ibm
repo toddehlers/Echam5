@@ -1,0 +1,460 @@
+#!/client/bin/ksh
+#
+# Sebastian Mutz, Jingmin Li, Todd Ehlers
+# Geowissenschaftliche Fakultät der Universität Tübingen
+#
+# For Load Leveler (scheduler) options and other useful
+# information about working on Blizzard, see the DKRZ online
+# documentation.
+#
+# For questions regarding this specific script, contact:
+# sebastian.mutz@uni-tuebingen.de, jingmin.li@uni-tuebingen.de
+# todd.ehlers@uni-tuebingen.de
+#
+# ##################################################################
+# About this template script (based on MPI template and            #
+# echam5-wiso run script by Martin Werner):                        #
+#                                                                  #
+# 1. Load Leveler options                                          #
+# 2. All important options are defined at the top of the run       #
+#    script. There is no need for the user to look beyond these.   #
+# 3. Generates a useful directory structure in your work folder    #
+# 5. Restarts itself automatically. Run time only limited by wall  #
+#    clock limit and your defined final run year.                  #
+# 6. Script re-submits itself after output for a defined amount of #
+#    model time has been calculated (as long as it is achieved     #
+#    within the wallclock limit).                                  #
+# 7. Makes backups of your input files, run scripts, configuration #
+#    files and model executable for experiment reproducability.    #
+# 8. No warranty. For your specific purposes, you might want to    # 
+#    make some changes.                                            #
+# ##################################################################
+#
+#
+#
+#
+#
+#
+#
+#
+################### BEGIN USER DECLARATIONS #####################
+# ------------------------------------------------------------- #
+#
+#
+# ===============================================================
+# |||||||||||||| Options for LoadLeveler (IBM) ||||||||||||||||||
+# ===============================================================
+#
+#---------------------------------------
+#
+# @ shell                = /client/bin/ksh
+# @ job_type             = parallel
+# @ node_usage           = not_shared
+# @ network.MPI          = sn_all,not_shared,us
+# @ rset                 = rset_mcm_affinity 
+# @ mcm_affinity_options = mcm_accumulate
+# @ node                 = 1
+# @ tasks_per_node       = 32
+# @ resources            = ConsumableMemory(750mb)
+# @ task_affinity        = core(1)
+# @ wall_clock_limit     = 08:00:00
+# @ job_name             = t004
+# @ output               = $(job_name).o$(jobid)
+# @ error                = $(job_name).e$(jobid)
+# @ notification         = never
+# @ queue
+#----------------------------------
+#
+export MEMORY_AFFINITY=MCM
+export MP_PRINTENV=YES
+export MP_LABELIO=YES 
+export MP_INFOLEVEL=2 
+export MP_EAGER_LIMIT=64k
+export MP_BUFFER_MEM=64M,256M
+export MP_USE_BULK_XFER=NO   
+export MP_BULK_MIN_MSG_SIZE=128k
+export MP_RFIFO_SIZE=4M
+export MP_SHM_ATTACH_THRESH=500000
+export LAPI_DEBUG_STRIPE_SEND_FLIP=8
+#
+#
+# ===============================================================
+# ||||||||| Job script for running ECHAM5 on Blizzard |||||||||||
+# ===============================================================
+#
+# If set and a command has a non-zero exit status, ERR trap is 
+# executed and programme exits 
+set -ex
+#
+#
+################### START USER DECLARATION #######################
+#----------------------------------------------------------------#
+#
+#
+# This is the section for user defined options for the model runs. 
+# It includes anything from your user and experiment name to green 
+# house gas concentrations. For more options, look in the namelist 
+# file in your echam/doc directory. Give the option variable a value 
+# in this section and make sure it's written in echam.namelists
+# under the correct heading (eg. runctl; see ECHAM namelists section), 
+# so it's passed on to the model.
+#
+# ---------------------------- 
+# ------- Usr and Dir --------
+#
+# The path names are generated automatically from the options below.
+# Please stick with directory structure of your echam5 distribution
+# to avoid any complications.
+#
+USR="b380055"             # user name as given to you by the DKRZ
+ACN="bb0803"              # account name as given to you by the DKRZ
+MODD=echam5-wiso          # model directory relative to home
+RUND=t004                 # subdirectoty in ~/model/run/  
+EXEC=echam5-wiso          # name of the executable in ~/model/bin/
+#
+# ----------------------------
+# ------- Job options --------
+#
+EXP="t004"                # experiment identifier
+EXPD="dkrz.b1_ew_t63.6h"  # extended experiment name. this will be used to name the output folder 
+RUN_FILE="dkrz.blizzard.echam5-wiso.run" # name of the run script you are currently viewing
+RE_FILE="rerun.date"      # file that stores last date of completed job iteration. used by re-submitting script
+LABORT=.true.             # stop at the end of the rerun chain? 
+NCPUS=32                  # number of CPUs for parallel run
+NPROCA=8                  # number of CPUs to process task A
+NPROCB=4                  # number of CPUs to process task B
+NTHREADS=1                # number of threads. 1 if no hybrid run
+#NPROMA=72                 # blocking length/vector length
+#
+# ----------------------------
+# ------- Model options ------
+#
+# Rerun options
+RERUN=.false.             # rerun switch: false for initial run, otherwise true. 
+REYR=1957                 # first value for rerun year (=start year for initial run; will correct automatically) 
+REMON=1                   # first rerun month (val+1 in restart file; 1 (jan) for initial run)
+REI=12			  # re-submission interval (units=months; model will calculate output for the given number  
+#                           of model time, then re-submit this script to start to continue calculations for the same
+#                           amount of time a.s.o. until the final year of the simulation is reached)
+# 		            NOTE: make sure the model can manage the amount of time within the wallclock limit
+#
+# Time related options
+YEARI=1957                # start year of simulation (do not change for restart runs)
+YEARF=1959                # final year of simulation (do not change for restart runs)
+#
+# Physics and dynamics 
+RES=31                    # model resolution
+LEVELS=19                 # number of levels
+LAMIP=.false.             # true if run with amip SST
+LMLO=.false.              # true if run with slab ocean
+#ICO2=2                    # 0 for no CO2, 2 for constant CO2 level = CO2VMR = 348.E-06
+#ICH4=2	                   # 0 for no CH4, 2 for constant CH4 level = CH4VMR = 1.65E-06
+#IN2O=2                    # 0 for no N2O, 2 for constant N2O level = N2OVMR = 306.E-09
+#
+# Output options
+FMT=2                     # output format 1=GRIB, 2=netCDF
+OU=months                 # output time interval unit
+OI=1                      # output time interval
+REOU=months               # output time interval unit for rerun files
+REOI=1                    # output time interval for rerun files 
+#
+#
+# ------------------------------------------------------------- #
+#################### END USER DECLARATION #######################
+#
+#
+#
+#
+# ===========================
+# ||||||||| Path declarations
+#
+# Path to working directory (model folder)
+WRK_DIR=/pf/b/${USR}/${MODD}           
+#
+# Path to job script
+RUN_DIR=${WRK_DIR}/run/${RUND}      
+#
+# Path to experiment directory
+EXP_DIR=/work/${ACN}/${EXP}_${EXPD}             
+#
+# Path to output directory
+#OUT_DIR=/work/scratch/b/${USR}/${EXP}   # space in scratch directory. for temporary storage
+OUT_DIR=${EXP_DIR}/output_raw            # space in work directory
+#
+# Path to directory storing rerun files
+RRN_DIR=${OUT_DIR}/rerun
+#
+# Path to initial data
+INI_DIR=/pf/b/${USR}/T${RES}
+#
+# Path to amip sst
+BND_DIR=${INI_DIR}/amip2
+#
+# Path to ocean delta values
+D18_DIR=${WRK_DIR}/iniwiso
+#
+# Path to model executable + executable name
+MODEL=${WRK_DIR}/bin/${EXEC}
+#
+# -------------------------------------------------
+# Paths in source directory. In src/ everything run 
+# specific is stored.
+#
+# Path to source directory
+S_SRC_DIR=${EXP_DIR}/src
+#
+# Path to input files
+S_INI_DIR=${S_SRC_DIR}/input
+#
+# Path to script directory
+S_SPT_DIR=${S_SRC_DIR}/scripts
+#
+# Path to model directory (run file will also be copied here)       
+S_MOD_DIR=${S_SRC_DIR}/model
+#
+# ------------------------------------
+# Paths to post processing directories
+#
+# Path to processed output directory
+P_OUT_DIR=${EXP_DIR}/output_processed
+#
+# Paths to script directories
+P_SPT_DIR=${EXP_DIR}/scripts
+P_NCO_DIR=${P_SPT_DIR}/nco           # for nco scripts
+P_NCL_DIR=${P_SPT_DIR}/ncl           # for ncl scripts
+P_GMT_DIR=${P_SPT_DIR}/gmt           # for gmt scripts
+P_FOR_DIR=${P_SPT_DIR}/fort          # for fortran scripts
+#
+# Path to plot directories
+P_PLT_DIR=${EXP_DIR}/plots
+P_DFT_DIR=${P_PLT_DIR}/drafts
+P_FIN_DIR=${P_PLT_DIR}/final
+#
+#
+#
+#
+# =============================
+# ||||||||| Pre-run to-do items
+#
+cd $RUN_DIR
+if [ -e $RE_FILE ]; then                     # if re-submission file exists
+   RERUN=.true.                              # it is a rerun
+else
+   RERUN=.false.
+fi
+#
+# ---------------------
+# Items for initial run
+# 
+if [[ $RERUN == .false. ]]; then
+   # 
+   # Make output directories
+   mkdir -p ${EXP_DIR}
+   mkdir -p ${OUT_DIR} && mkdir -p ${RRN_DIR}  
+   #
+   # Make source directories
+   mkdir -p ${S_SRC_DIR}
+   mkdir -p ${S_INI_DIR} && mkdir -p ${S_MOD_DIR} && mkdir -p ${S_SPT_DIR}
+   mkdir -p ${S_MOD_DIR}/${MODD} && mkdir -p ${S_MOD_DIR}/${MODD}/run 
+   mkdir -p ${S_MOD_DIR}/${MODD}/bin && mkdir -p ${S_MOD_DIR}/${MODD}/config
+   #
+   # Make post processing directories
+   mkdir -p ${P_OUT_DIR}                           # processed output directory
+   mkdir -p ${P_NCO_DIR} && mkdir -p ${P_NCL_DIR}  # scripts directories
+   mkdir -p ${P_GMT_DIR} && mkdir -p ${P_FOR_DIR}  # scripts directories
+   mkdir -p ${P_DFT_DIR} && mkdir -p ${P_FIN_DIR}  # plots directories
+   #   
+   # Save input files
+   cp -rf ${INI_DIR} ${S_INI_DIR} 
+   cp -rf ${D18_DIR} ${S_INI_DIR}               
+   # Save model files
+   cp -rf ${RUN_DIR} ${S_MOD_DIR}/${MODD}/run             # save run scripts
+   cp ${MODEL} ${S_MOD_DIR}/${MODD}/bin                   # save model executable
+   cp ${WRK_DIR}/config/mh* ${S_MOD_DIR}/${MODD}/config   # save configuration file(s)
+   #
+   # Pass on year value
+   REYR=$YEARI
+#
+#  ---------------
+#  Items for rerun
+#   
+else            
+   #
+   # Get rerun date from restart text file
+   read REYR REMON < $RE_FILE   
+fi
+#
+# -------------------------------------------------
+# Calculate final model date for this submitted job
+# (not the final date of the simulation)       
+# 
+i=1                                                  # reset counting variable
+MON=0
+YR=0
+# Count no. of years and months
+while (( $i < $REI )); do                            # go through all months
+   i=$(($i+1)) 
+   if (( $MON < 12 )); then
+      MON=$(($MON+1))                                # adjust month 
+   else
+      YR=$(($YR+1)) && MON=0                         # adjust year and month 
+   fi
+done
+#
+# Calculate stop date                                           
+YEARB=$(($REYR+$YR))
+MONB=$(($REMON+$MON))
+#
+# If next stop date exceeds ultimate stop date, correct
+if (( $YEARB > $YEARF )); then
+   YEARB=$YEARF
+   MONB=12
+fi
+# ------------------------------------------------------------------ 
+# Calculate date for namelist (final model date for job + 1 timestep)
+# 
+# Find out if it is last month of the year
+if (( $(($MONB+1)) < 12 )); then
+   MONC=$(($MONB+1)) && YEARC=$YEARB                                     # adjust month
+else
+   YEARC=$(($YEARB+1)) && MONC=1                                         # adjust year and month
+fi
+DAYC=01
+#
+# Make sure format is correct
+if (( $MONC < 10 )); then
+   MONC="0"$MONC
+else
+   MONC=$MONC
+fi
+#
+#
+#                                                                    
+#
+# ================================
+# ||||||||| Specification of files
+#
+# -----------------------------------------------
+# Change directory before creating symbolic links.  
+# All need to be in the output directory.
+cd $OUT_DIR
+#
+rm -f unit.?? sst* ice* hdpara.nc hdstart.nc rrtadata 
+#
+# Create symbolic links for various input files
+ln -s  ${INI_DIR}/T${RES}L${LEVELS}_jan_spec.nc       unit.23
+ln -s  ${INI_DIR}/T${RES}_jan_surf.nc                 unit.24
+ln -s  ${INI_DIR}/T${RES}_O3clim2.nc                  unit.21
+ln -s  ${INI_DIR}/T${RES}_VLTCLIM.nc                  unit.90
+ln -s  ${INI_DIR}/T${RES}_VGRATCLIM.nc                unit.91
+ln -s  ${INI_DIR}/T${RES}_TSLCLIM2.nc                 unit.92
+#
+ln -s  ${INI_DIR}/surrta_data                         rrtadata
+ln -s  ${INI_DIR}/hdpara.nc                           hdpara.nc
+ln -s  ${INI_DIR}/hdstart.nc                          hdstart.nc
+#
+# Create symbolic links for delta values
+ln -s  ${D18_DIR}/T${RES}_wisosw_d.nc                 unit.25
+#
+# Create symbolic links for lamip=.false.
+ln -s  ${BND_DIR}/T${RES}_amip2sst_clim.nc            unit.20
+ln -s  ${BND_DIR}/T${RES}_amip2sic_clim.nc            unit.96
+#
+#
+#
+#
+# ===================
+# ||||||||| Start run
+#
+# 
+############ Run loop ###############
+#-----------------------------------#
+#
+LOOP=.true.
+#
+# While the final model year is not reached, do as follows
+while [[ $LOOP ==  .true. ]]; do
+#
+# ---------------
+# ECHAM5 namelist
+#
+cat > namelist.echam << EOF
+&runctl
+  out_datapath = "${OUT_DIR}/"
+  out_expname  = "${EXP}"
+  out_filetype = ${FMT}
+  lresume      = ${RERUN}
+  lamip        = ${LAMIP}
+  lmlo	       = ${LMLO}
+  labort       = ${LABORT}
+  dt_start     = ${YEARI},01,01,12,0,0
+  dt_stop      = ${YEARC},${MONC},${DAYC},12,0,0
+  putdata      = ${OI}, '${OU}', 'first', 0
+  putrerun     = ${REOI}, '${REOU}', 'last', 0 
+  nproca       = ${NPROCA}
+  nprocb       = ${NPROCB}
+/
+&wisoctl
+  nwiso=3                         
+/
+EOF
+#
+# --------------------
+# Run model executable
+#
+export ECHAM5_THREADS=$NTHREADS
+#
+# IBM/POE startup
+poe $MODEL 
+#
+# -----------------------------
+# Change declarations for rerun 
+#
+# Set rerun switch to true (no effect if already set to true)
+RERUN=.true.  
+# 
+# see if another loop iteration is neccessary
+if (( $REYR == $YEARB )) && (( $REMON == $MONB )); then
+   LOOP=.false.
+else
+   # If last month of year not reached, keep year value and set month to month+1
+   # If last month of year reached, set year value to value +1 and reset month to 1
+   if (( $REMON < 12 )); then
+      REMON=$(($REMON+1))                                                  # adjust month
+   else
+      REYR=$(($REYR+1)) && REMON=1                                         # adjust year and month
+   fi
+fi
+#
+#----------------------------------------#
+############# End of run loop ############
+# 
+done
+#
+#
+#
+#
+# ===============================
+# ||||||||| Prepare re-submission
+#
+cd $RUN_DIR
+if (( $YEARB == $YEARF )) && (( $REMON == $MONB )); then
+   rm $RE_FILE 
+   echo "simulation complete"    
+else
+   # write last calculated date in restart text file
+   # restart file also serves as an indicator for whether
+   # or not the next run is a rerun or not.
+   cat > $RE_FILE << EOF
+   ${YEARC} ${MONC}
+EOF
+   #
+   echo "this run was good. ANOTHER!"
+   llsubmit ${RUN_DIR}/${RUN_FILE}
+fi
+#
+#
+#
+#
+# exit script
+exit

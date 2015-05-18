@@ -1,0 +1,147 @@
+#! /bin/bash
+#-----------------------------------------------------------------------------
+# Version for Sun GridEngine
+#
+#$ -S /bin/bash
+#$ -N echam5
+#$ -o $JOB_NAME.o$JOB_ID
+#$ -j y
+#$ -cwd
+#$ -pe orte 16
+#-----------------------------------------------------------------------------
+export MPIROOT=/sw/sles9-x64/ofed/openmpi-1.2.5-nag
+export PATH=$MPIROOT/bin:$PATH
+#-----------------------------------------------------------------------------
+export SGE_ROOT=/opt/sge
+export ARCH=$($SGE_ROOT/util/arch)
+export SGE_CELL=tornado
+export PATH=$SGE_ROOT/bin/$ARCH:$PATH
+export LIBPATH=$SGE_ROOT/lib/$ARCH:$LIBPATH
+export LD_LIBRARY_PATH=$SGE_ROOT/lib/$ARCH:$LD_LIBRARY_PATH
+#
+#-----------------------------------------------------------------------------
+#
+# Version for shell script running on tornado@MPI/DKRZ
+#
+#-----------------------------------------------------------------------------
+#
+#                        Job file to run ECHAM 5
+#
+#-----------------------------------------------------------------------------
+#
+# If a command has a non-zero exit status, execute ERR trap, if set, and exit
+#
+#set -ex
+#
+#-----------------------------------------------------------------------------
+#
+# experiment identifier (replace EEEEE with your m2140XX and a three digit
+# number for the current experiment, TTTT replace by some text
+# EXP=EEEEETTTT (see as well above for the job names)
+#
+EXP="lkm0001nagt"  # experiment identifier
+#
+RERUN=.false.    # Rerun switch; .false. for initial run, .true. else
+#
+NPROMA=32        # Blocking length, should be large for vector architecture
+NCPUS=4
+NPROCA=2
+NPROCB=2
+#
+RES=31           # spectral truncation of run
+LEVELS=19        # number of levels
+#
+#-----------------------------------------------------------------------------
+#
+WORK_DIR=/scratch/work/mh0081/m214089/echam-5.4.01_bugfix.1
+#
+# absolute path to directory with job scripts:
+SCRIPTDIR=${WORK_DIR}/run
+#
+# absolute path to directory with plenty of space:
+EXPDIR=$WORK_DIR/experiments/${EXP}
+#
+# absolute path to directory with initial data:
+INITIAL_DATA=/pool/data/ECHAM5/T${RES}
+#
+# absolute path to directory with SST and sea ice files:
+BOUNDARY_DATA=${INITIAL_DATA}/amip2
+#
+# absolute path to model binary, including the executable
+MODEL=${WORK_DIR}/bin/echam5
+#
+#-----------------------------------------------------------------------------
+#
+# the directory for the experiment will be created, if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+#
+#-----------------------------------------------------------------------------
+#
+cd $EXPDIR           #  output and rerun files are written into $EXPDIR
+#
+#-----------------------------------------------------------------------------
+#
+# specification of files
+#
+#-----------------------------------------------------------------------------
+#
+rm -f unit.?? sst* ice* hdpara.nc hdstart.nc rrtadata
+#
+ln -s  ${INITIAL_DATA}/T${RES}L${LEVELS}_jan_spec.nc       unit.23
+ln -s  ${INITIAL_DATA}/T${RES}_jan_surf.nc                 unit.24
+#
+ln -s  ${INITIAL_DATA}/T${RES}_O3clim2.nc                  unit.21
+ln -s  ${INITIAL_DATA}/T${RES}_VLTCLIM.nc                  unit.90
+ln -s  ${INITIAL_DATA}/T${RES}_VGRATCLIM.nc                unit.91
+ln -s  ${INITIAL_DATA}/T${RES}_TSLCLIM2.nc                 unit.92
+#
+ln -s  ${INITIAL_DATA}/surrta_data                         rrtadata
+ln -s  ${INITIAL_DATA}/hdpara.nc                           hdpara.nc
+ln -s  ${INITIAL_DATA}/hdstart.nc                          hdstart.nc
+#
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sst_clim.nc           unit.20
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sic_clim.nc           unit.96
+#
+years="1977 1978 1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 1989"
+years="${years} 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000"
+for year in $years ; do
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sst_${year}.nc  sst${year}
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sic_${year}.nc  ice${year}
+done
+#
+#-----------------------------------------------------------------------------
+#
+# ECHAM5 namelist
+#   - for production runs set LABORT=.FALSE.
+#
+cat > namelist.echam << EOF
+&runctl
+  out_datapath = "${EXPDIR}/"
+  out_expname  = "${EXP}"
+  out_filetype = 1                  ! 1 - GRIB1, 2 - netCDF
+  lresume      = $RERUN
+  lamip        = T
+  labort       = T
+  dt_start     = 1978,01,01,12,0,0
+  dt_stop      = 1998,12,31,12,0,0
+  putdata      = 6, 'hours', 'first', 0
+  putrerun     = 1, 'days', 'last', 0
+  nproma       = ${NPROMA}
+  nproca       = ${NPROCA}
+  nprocb       = ${NPROCB}
+/
+EOF
+#
+#-----------------------------------------------------------------------------
+#
+# tornado/SGE startup
+#
+mpiexec -np $NCPUS $MODEL 
+#
+#-----------------------------------------------------------------------------
+#
+exit
+#
+#-----------------------------------------------------------------------------

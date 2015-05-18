@@ -1,0 +1,61 @@
+Running the model with OpenMP requires additional compiler options.
+
+Currently the model has been successfully tested on:
+
+NEC SX-6/8           (f95 2.0 rev. 315)
+IBM Power4/4+/5      (xlf 9.1)
+Sun Sunfire 15k      (Sparc, Solaris 9, Sun Studio 10)
+Sun v40z             (Opteron, Solaris 10, Sun Studio 10)
+
+Failing on the following machines:
+
+Intel Itanium 2, Intel Compiler 8.1
+Intel P4, Intel Compiler 8.1
+Intel P4, PGI f95 6.0.5            
+
+For the running versions the following additional compile/link options
+are required:
+
+NEC: -Popenmp
+IBM: -qopenmp
+SUN: -openmp
+
+For starting the environment variable ECHAM5_THREADS need to be set
+accordingly.
+
+Starting multinode jobs on the NEC requires the hybrid mode. Important
+is to add the following line in the job script after the definition of
+ECHAM5_THREADS:
+
+export MPIEXPORT="ECHAM5_THREADS"
+
+otherwise ECHAM5_THREADS is only available on the first node.
+For starting multinode jobs take a look on www.dkrz.de.
+
+For the IBM the following has been used successfully using 1 node:
+
+# Version for LoadLeveler (IBM)
+#
+# @ shell            = /usr/bin/ksh
+# @ output           = $(host).$(jobid).o
+# @ error            = $(host).$(jobid).o
+# @ job_type         = parallel
+# @ Network.MPI      = csss,shared,US
+# @ class            = np
+# @ resources       = ConsumableCpus(4) ConsumableMemory(400mb)
+# @ node             = 1
+# @ tasks_per_node   = 8
+# @ notification     = never
+# @ job_name         = eeexxx
+# @ cpu_limit        = 04:00:00
+# @ wall_clock_limit = 04:00:00
+# @ environment      = MEMORY_AFFINITY=MCM; \
+#                      MP_SHARED_MEMORY=yes; MP_WAIT_MODE=poll; \
+#                      MP_SINGLE_THREAD=yes; MP_TASK_AFFINITY=MCM; \
+#                      ECHAM5_THREADS=4
+# @ queue
+
+Only the NEC version has been tested in terms of performance.
+
+Luis Kornblueh, 2005-10-31 (luis.kornblueh@zmaw.de)
+

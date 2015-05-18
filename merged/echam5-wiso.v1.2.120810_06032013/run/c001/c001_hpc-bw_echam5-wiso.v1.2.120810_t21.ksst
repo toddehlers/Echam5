@@ -1,0 +1,383 @@
+#!/bin/bash
+#
+# Sebastian Mutz, Jingmin Li, Todd Ehlers
+# Geowissenschaftliche Fakultät der Universität Tübingen
+#
+# For questions regarding this specific script, contact:
+# sebastian.mutz@uni-tuebingen.de, jingmin.li@uni-tuebingen.de
+# todd.ehlers@uni-tuebingen.de
+#
+# ##################################################################
+# About this template script (based on MPI template):              #
+#                                                                  #
+# 1. Scheduler options                                             #
+# 2. All important options are defined at the top of the run       #
+#    script. There is no need for the user to look beyond these.   #
+# 3. Generates a useful directory structure in your work folder    #
+# 5. Restarts itself automatically. Run time only limited by wall  #
+#    clock limit and your defined final run year.                  #
+# 6. Makes backups of the rerun files.                             #
+# 7. Allows manual restarts from a time step of your choice        #
+# 8. Makes backups of your input files, run scripts, configuration #
+#    files and model executable for experiment reproducability.    #
+# 9. No warranty. For your specific purposes, you might want to    # 
+#    make some changes.                                            #
+# ##################################################################
+#
+#
+#
+#
+#
+#
+#
+#
+################### BEGIN USER DECLARATIONS #####################
+# ------------------------------------------------------------- #
+#
+#
+# ===============================================================
+# |||| Torque Portable Batch System (PBS, Scheduler) Options ||||
+# ===============================================================
+#
+# Options:
+#
+#PBS -l nodes=4:ppn=8:nehalem
+#PBS -l walltime=0:20:0
+#PBS -M sebastian.mutz@uni-tuebingen.de
+#PBS -m abe
+#PBS -N test_2013_03_06
+#PBS -q geotest
+#
+# Comments:
+#
+# request 4 node, 8 cores
+# set wallclock limit to 20 minutes
+# send email to given address
+# send email only when programme aborts
+# set job name to test_2013_01_30
+# set queue to geotest, we have to use this
+#
+#
+#
+#
+#
+#
+#
+# ===============================================================
+# ||||||||| Job script for running ECHAM5 on HPC-BW |||||||||||||
+# ===============================================================
+#
+# If set and a command has a non-zero exit status, ERR trap is 
+# executed and programme exits 
+set -ex
+#
+# ============================
+# ||||||||| Basic declarations
+#
+# This is the section for user defined options for the model runs. 
+# It includes anything from your user and experiment name to green 
+# house gas concentrations. For more options, look in the namelist 
+# file in your echam/doc directory. Give the option variable a value 
+# in this section and make sure it's written in echam.namelists
+# under the correct heading (eg. runctl; see ECHAM namelists section), 
+# so it's passed on to the model.
+#
+# ---------------------------- 
+# ------- Usr and Dir --------
+#
+# The path names are generated automatically from the options below.
+# Please stick with directory structure of your echam5 distribution
+# to avoid any complications.
+#
+USR=epifm01                    # user name
+MODD=echam5-wiso.v1.2.120810_06032013   # model directory relative to home
+RUND=c001                      # subdirectoty in ~/model/run/  
+EXEC=echam5-wiso               # name of the executable in ~/model/bin/
+#
+#LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home-link/$USR/netcdf/lib
+#export LD_LIBRARY_PATH
+#
+# ----------------------------
+# ------- Job options --------
+#
+EXP=c001                  # experiment identifier
+EXPD=hpcbw_e5w_t21.6h     # extended experiment name. this will be used to name the output folder 
+LABORT=.true.             # stop at the end of the rerun chain? 
+NCPUS=32                  # number of CPUs for parallel run
+NPROCA=8                  # number of CPUs to process task A
+NPROCB=4                  # number of CPUs to process task B
+NTHREADS=1                # number of threads. 1 if no hybrid run
+#NPROMA=16                 # blocking length/vector length
+#
+# ----------------------------
+# ------- Model options ------
+#
+# Rerun options
+RERUN=.false.             # rerun switch: false for initial run, otherwise true. 
+REYR=1980                 # first value for rerun year (=start year for initial run; will correct automatically) 
+REMON=1                   # first rerun month (val+1 in restart file; 1 (jan) for initial run)
+#
+# ALTRERUN=.true. will restart model from a time other than the last 
+# calculated time step. It only works if you saved the rerun file for the time step 
+# (see rerun output options).  Write the desired restart year and moth in REYR and REMON.
+ALTRERUN=.false.     # false if you want to restart from the most recently calculated time step
+#
+# Time related options
+YEARI=1980                # start year of run (do not change for restart runs)
+YEARF=1980                # final year of run (do not change for restart runs)
+#
+# Put all years in year variable. not neccessary if model does not rely on time dependent input.
+years="1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 1989 1990"
+years="${years} 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000"
+#
+# Physics and dynamics 
+RES=31                    # model resolution
+LEVELS=19                 # number of levels
+LAMIP=.true.              # true if run with amip SST
+LMLO=.false.              # run with slab ocean?
+ICO2=2                    # 0 for no CO2, 2 for constant CO2 level = CO2VMR = 348.E-06
+ICH4=2	                  # 0 for no CH4, 2 for constant CH4 level = CH4VMR = 1.65E-06
+IN2O=2                    # 0 for no N2O, 2 for constant N2O level = N2OVMR = 306.E-09
+#
+# Output options
+FMT=2                     # output format 1=GRIB, 2=netCDF
+OU=months                 # output time interval unit
+OI=1                      # output time interval
+REOU=months                # output time interval unit for rerun files
+REOI=1                    # output time interval for rerun files 
+#
+#
+# ------------------------------------------------------------- #
+#################### END USER DECLARATION #######################
+#
+#
+#
+#
+#
+#
+#
+# ===========================
+# ||||||||| Path declarations
+#
+# Path to working directory (model folder)
+WRK_DIR=/home-link/${USR}/ECHAM5           
+#
+MOD_DIR=/home-link/${USR}/models/ECHAM/${MODD}
+#
+# Path to job script
+RUN_DIR=${MOD_DIR}/run/${RUND}      
+#
+# Path to experiment directory
+EXP_DIR=${WRK_DIR}/experiments/${EXP}_${EXPD}             
+#
+# Path to output directory
+OUT_DIR=${EXP_DIR}/output_raw
+#
+# Path to directory storing rerun files
+RRN_DIR=${OUT_DIR}/rerun
+#
+# Path to initial data
+INI_DIR=${MOD_DIR}/input/T${RES}
+#
+# Path to amip sst
+BND_DIR=${INI_DIR}/amip2
+#
+# Path to ocean delta values
+D18_DIR=${MOD_DIR}/iniwiso
+#
+# Path to model executable + executable name
+MODEL=${MOD_DIR}/bin/${EXEC}
+#
+# -------------------------------------------------
+# Paths in source directory. In src/ everything run 
+# specific is stored.
+#
+# Path to source directory
+S_SRC_DIR=${EXP_DIR}/src
+#
+# Path to input files
+S_INI_DIR=${S_SRC_DIR}/input
+#
+# Path to script directory
+S_SPT_DIR=${S_SRC_DIR}/scripts
+#
+# Path to model directory (run file will also be copied here)       
+S_MOD_DIR=${S_SRC_DIR}/model
+#
+# ------------------------------------
+# Paths to post processing directories
+#
+# Path to processed output directory
+P_OUT_DIR=${EXP_DIR}/output_processed
+#
+# Paths to script directories
+P_SPT_DIR=${EXP_DIR}/scripts
+P_NCO_DIR=${P_SPT_DIR}/nco           # for nco scripts
+P_NCL_DIR=${P_SPT_DIR}/ncl           # for ncl scripts
+P_GMT_DIR=${P_SPT_DIR}/gmt           # for gmt scripts
+P_FOR_DIR=${P_SPT_DIR}/for           # for fortran scripts
+#
+# Path to plot directories
+P_PLT_DIR=${EXP_DIR}/plots
+P_DFT_DIR=${P_PLT_DIR}/drafts
+P_FIN_DIR=${P_PLT_DIR}/final
+#
+# ======================================
+# ||||||||| Generate directory structure
+#
+# Generate directories for initial run
+if [[ $RERUN == .false. ]]; then
+   #
+   # Make output directories
+   mkdir -p ${EXP_DIR}
+   mkdir -p ${OUT_DIR} && mkdir -p ${RRN_DIR}  
+   #
+   # Make source directories
+   mkdir -p ${S_SRC_DIR}
+   mkdir -p ${S_INI_DIR} && mkdir -p ${S_MOD_DIR} && mkdir -p ${S_SPT_DIR}
+   mkdir -p ${S_MOD_DIR}/${MODD} && mkdir -p ${S_MOD_DIR}/${MODD}/run 
+   mkdir -p ${S_MOD_DIR}/${MODD}/bin && mkdir -p ${S_MOD_DIR}/${MODD}/config
+   #
+   # Make post processing directories
+   mkdir -p ${P_OUT_DIR}                           # processed output directory
+   mkdir -p ${P_NCO_DIR} && mkdir -p ${P_NCL_DIR}  # scripts directories
+   mkdir -p ${P_GMT_DIR} && mkdir -p ${P_FOR_DIR}  # scripts directories
+   mkdir -p ${P_DFT_DIR} && mkdir -p ${P_FIN_DIR}  # plots directories
+fi
+#
+# -------------------------------------------
+# Save relevant files in the source directory
+#
+if [[ $RERUN == .false. ]]; then
+   # save input files
+   cp -r ${INI_DIR} ${S_INI_DIR}
+   cp -r ${D18_DIR} ${S_INI_DIR}            
+   #save model files
+   cp -r ${RUN_DIR} ${S_MOD_DIR}/${MODD}/run              # save run scripts
+   cp ${MODEL} ${S_MOD_DIR}/${MODD}/bin                   # save model executable
+   cp ${MOD_DIR}/config/mh* ${S_MOD_DIR}/${MODD}/config   # save configuration file(s)
+fi
+#
+# ================================
+# ||||||||| Specification of files
+#
+# -----------------------------------------------
+# Change directory before creating symbolic links.  
+# All need to be in the output directory.
+cd $OUT_DIR
+#
+rm -f unit.?? sst* ice* hdpara.nc hdstart.nc rrtadata 
+#
+# Create symbolic links for various input files
+ln -sf  ${INI_DIR}/T${RES}L${LEVELS}_jan_spec.nc       unit.23
+ln -sf  ${INI_DIR}/T${RES}_jan_surf.nc                 unit.24
+ln -sf  ${INI_DIR}/T${RES}_O3clim2.nc                  unit.21
+ln -sf  ${INI_DIR}/T${RES}_VLTCLIM.nc                  unit.90
+ln -sf  ${INI_DIR}/T${RES}_VGRATCLIM.nc                unit.91
+ln -sf  ${INI_DIR}/T${RES}_TSLCLIM2.nc                 unit.92
+#
+ln -sf  ${INI_DIR}/surrta_data                         rrtadata
+ln -sf  ${INI_DIR}/hdpara.nc                           hdpara.nc
+ln -sf  ${INI_DIR}/hdstart.nc                          hdstart.nc
+#
+# Create symbolic links for delta values
+ln -sf  ${D18_DIR}/T${RES}_wisosw_d.nc                 unit.25
+#
+# Create symbolic links for SSTs
+ln -sf  ${BND_DIR}/T${RES}_amip2sst_clim.nc            unit.20
+ln -sf  ${BND_DIR}/T${RES}_amip2sic_clim.nc            unit.96
+#
+for year in $years ; do
+ln -sf  ${BND_DIR}/T${RES}_amip2sst_${year}.nc  sst${year}
+ln -sf  ${BND_DIR}/T${RES}_amip2sic_${year}.nc  ice${year}
+done
+#
+# =======================
+# ||||||||| Preparing run 
+# 
+# If it is no rerun, set REYR to the start year
+if [[ $RERUN == .false. ]]; then
+   REYR=$YEARI
+fi
+# If restart from alternative time step, get relevant rerun 
+# file from rerun folder 
+#if [[ $ALTRERUN == .true. ]]; then
+#   cp ${RRN_DIR}/rerun_${EXP}_echam_${REYR}${REMON} ${OUT_DIR}/rerun_${EXP}_echam
+#fi
+# ####################################
+# ########### Restart loop ###########
+#
+# While the final model year is not reached, do as follows
+#while [[ $REYR < $YEARF+1 ]];do
+#
+# =========================
+# ||||||||| ECHAM5 namelist
+#
+cat > namelist.echam << EOF
+&runctl
+  out_datapath = "${OUT_DIR}/"
+  out_expname  = "${EXP}"
+  out_filetype = ${FMT}
+  lresume      = ${RERUN}
+  lamip        = ${LAMIP}
+  lmlo	       = ${LMLO}
+  labort       = ${LABORT}
+  dt_start     = ${YEARI},01,01,0,0,0
+  dt_stop      = ${YEARF},12,31,23,59,0
+  putdata      = ${OI}, '${OU}', 'first', 0
+  putrerun     = ${REOI}, '${REOU}', 'last', 0
+!  nproma       = ${NPROMA} 
+  nproca       = ${NPROCA}
+  nprocb       = ${NPROCB}
+/
+&radctl
+  ico2         = ${ICO2}
+  ich4	       = ${ICH4}
+  in2o         = ${IN2O} 
+/
+&wisoctl
+  nwiso=3
+/
+EOF
+
+# added 2013.01.29, by Willi Kappler
+# load modules for the cluster in Tuebingen
+
+. ~/.bashrc # read module path
+
+module load compiler/gnu/4.5
+module load mpi/openmpi/1.4.3-gnu-4.5
+module load compiler/intel/12.0
+module load compiler/intel/ct_4.0
+module load system/moab/7.1.1
+
+#
+# ==============================
+# ||||||||| Run model executable
+#
+mpirun $MODEL 
+#
+# =======================================
+# ||||||||| Change declarations for rerun 
+#
+# Set rerun switch to true (no effect if already set to true)
+RERUN=.true.  
+# 
+# If last month of year not reached, keep year value and set month to month+1
+# If last month of year reached, copy end-of-year rerun file into rerun directory,
+# set year value to value +1 and reset month to 1
+if (( $REMON < 12 ));then
+   REMON=$(($REMON+1))                                                  # adjust month
+else
+#   cp rerun_${EXP}_echam ${RRN_DIR}/rerun_${EXP}_echam_${REYR}${REMON}  # rerun file backup
+   REYR=$(($REYR+1)) && REMON=1                                         # adjust year and month
+fi
+#
+# ############ end of restart loop ############
+# ############################################# 
+#done
+#
+/usr/local/bin/qsub -o /home-link/epifm01/models/ECHAM/echam5-wiso.v1.2.120810_06032013/run/c001/ -e /home-link/epifm01/models/ECHAM/echam5-wiso.v1.2.120810_06032013/run/c001/ /home-link/epifm01/models/ECHAM/echam5-wiso.v1.2.120810_06032013/run/c001/c001_hpc-bw_echam5-wiso.v1.2.120810_t21.ksst
+#
+# exit script
+exit

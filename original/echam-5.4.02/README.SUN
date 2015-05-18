@@ -1,0 +1,10 @@
+Usage of the parallel version of echam5 may require that the Makefile,
+after running configure, needs an additionel edit.
+
+The SUN MPI library is only as dynamical library available. To allow
+ld.so to find this library you need to add
+
+-R$(MPIROOT)/lib to the MPI_LIB variable in the Makefile between
+-L$(MPIROOT/lib -lmpi. The resulting line should look like:
+
+MPI_LIB        = -L$(MPIROOT)/lib -R$(MPIROOT)/lib -lmpi

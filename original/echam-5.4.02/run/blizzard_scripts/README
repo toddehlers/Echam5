@@ -1,0 +1,8 @@
+* 001_dkrz.e5.run.ibm
+
++ SSTs could be read (SST input year = start year -1)
++ model was started
++ output was created
+- experiment stopped after 10. jan
+
+error reports in 001_tbTt21.e*

@@ -1,0 +1,100 @@
+Readme - 21 November 2005
+
+  !----------------------------------------------------------------------------
+  !
+  ! Copyright 2000-2005 by Max Planck Institute for Meteorology
+  !
+  ! This software can be used only under the conditions of the 
+  ! "MPI-M Software Licence Agreement", which must be signed 
+  ! by each user.
+  !
+  ! The "MPI-M Software Licence Agreement" and the information on
+  ! the distribution of MPI-M models are given on:
+  !
+  ! http://www.mpimet.mpg.de/en/extra/models/distribution/index.php
+  !
+  ! The ECHAM5-webpage can be found at:
+  !
+  ! http://www.mpimet.mpg.de/en/extra/models/echam/echam5.php
+  !
+  !----------------------------------------------------------------------------
+
+
+INSTALLATION
+------------
+
+ECHAM5 is doing IO for the initial and restart files based on UCAR's 
+netCDF (see http://www.unidata.ucar.edu/packages/netcdf).  Take care 
+that you use the right setup for your Fortran compiler when installing 
+netCDF.
+
+Configuration files for a number of operating systems and/or compilers
+are provided in the config directory. Please check your system's
+configuration file and edit it according to your needs. If you do any
+additional system port, let us know about it.
+
+You have to set the variable NETCDFROOT to the netCDF root directory
+on your machine in the machine specific mh-'file'.  At MPI-MET this is 
+for the Sun and Linux IA32 systems:
+
+NETCDFROOT = /client
+
+For use of the parallelized version you have to set the according path
+and libary information in the respective mh-'file' which enables a 
+compilation with MPI.
+
+To compile you simply stay in the main directory echam5 and type:
+
+configure
+gmake
+
+In case you would like to compile with the cross compiling environment
+on the Linux IA32 systems at MPI-MET  or on cross.dkrz.de do:
+
+configure --host=sx6
+gmake
+
+The make system requires GNU make. In case you have not installed this,
+you need to download and install it yourself or ask your system administrator.
+
+RUNNING
+-------
+
+To run echam5 cd to echam5/run and edit the file ham5run (or one of the
+others when you need the column or middle atmosphere version).
+Edit machine specific items like qsub options etc.
+
+TEST FOR CORRECTNESS
+--------------------------
+
+coming one day ...
+
+ADDITIONAL INFORMATION
+----------------------
+
+1. Configuration files for a larger set of operating systems and/or
+   compiler are given in the config directory. Please check out your 
+   system's configuration file. If you do any additional system port, 
+   let us know about it.
+
+2. Missing preprocessor option
+
+   For compiler which does not have a preprocessor enabling option, we
+   provide a perl script util/f2F.pl. First copy this file into the main
+   echam5 directory and check the path to your perl binary at top of this
+   script. It changes all .f90 to .F90. As far as we know, this files will
+   be automatically preprocessed by all compilers. This script patches as 
+   well the Makefiles and configure.
+
+3. It should be noted that the Sun Workshop f90 compiler in all versions 
+   prior to Forte 6 is not able to handle the model. For using ECHAM on a 
+   Sun workstation another compiler is required. We develop using the 
+   Fujitsu f95 compiler. At MPI-MET the compiler is available in the standard
+   setup (frt).
+
+   Note: It seems that the newest version of the Sun Compiler (Forte 6) is
+         able to compile the model with very good performance, but tricky 
+         compiling.	
+
+Bug reports/info/comments to: monika.esch@zmaw.de, luis.kornblueh@zmaw.de, 
+                       ulrich.schlese@zmaw.de, and uwe.schulzweida@zmaw.de

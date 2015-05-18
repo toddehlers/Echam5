@@ -1,0 +1,113 @@
+# AMD64/EMT64/Linux
+#
+#-----------------------------------------------------------------------------
+# NAG f95 - this is for testing and debugging
+#
+F90      = nagf95
+FFLAGS   = -O
+F90FLAGS = -colour -C=all -maxcontin=99 -nan -gline -g -fpp -DNAG -DARGCHECK -wmismatch=mpi_bcast,mpi_send,mpi_recv,mpi_isend,mpi_irecv,mpi_allreduce,mpi_get_address,mpi_gather,nf_get_var_double,nf_put_var_double,nf_def_var,nf_put_vara_double,dgemm
+LIBS     = -L../lib -lsupport -llapack -lblas
+SRCDIRS  = blas lapack
+MPIROOT  = /sw/sles9-x64/ofed/openmpi-1.2.5-nag
+#
+ARCH       = LINUX
+#
+MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -L/usr/local/ofed/lib64 -libverbs -lrt -lnuma -ldl -lnsl -lutil -lpthread
+#
+NETCDFROOT = /sw/sles9-x64/netcdf-3.6.1
+#
+CC       = gcc
+CFLAGS   = -O -DNAGf90Fortran
+#
+DEFOPT   = -D
+MODOPT   = -I
+#
+#-----------------------------------------------------------------------------
+# PGI pgf95 7.1-2/OpenMPI 1.2.5, tornado@MPI/DKRZ
+#
+#F90      = pgf95
+#FFLAGS   = -O3 -Kieee -fastsse -Mnontemporal -Mnorecursive -Mextend -Mpreprocess -tp amd64e
+#F90FLAGS = -O3 -Kieee -fastsse -Mnontemporal -Mnorecursive -Mextend -Mpreprocess -tp amd64e -DHAVE_LIBNETCDF64
+#LIBS     = -L../lib -lsupport  -Bstatic -L/sw/sles9-x64/acml-3.6.0/pgi64/lib -lacml -lacml_mv -Bdynamic
+#SRCDIRS  =
+#MPIROOT  = /sw/sles9-x64/ofed/openmpi-1.2.5-pgi7
+#
+#ARCH       = LINUX
+#
+#MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -L/usr/local/ofed/lib64 -libverbs -lrt -lnuma -ldl -lnsl -lutil -lpthread
+#
+#NETCDFROOT = /sw/sles9-x64/netcdf-3.6.1
+#
+#CC       = gcc
+#CFLAGS   = -O -DpgiFortran
+#
+#DEFOPT   = -D
+#MODOPT   = -I
+#
+#-----------------------------------------------------------------------------
+# Pathscale pathf95 3.0/OpenMPI 1.2.5, tornado@MPI/DKRZ
+#
+#F90      = pathf95
+#FFLAGS   = -OPT:Ofast -O2 -fno-second-underscore
+#F90FLAGS = -OPT:Ofast -O2 -fno-second-underscore -cpp -DHAVE_LIBNETCDF64
+#LIBS     = -L../lib -lsupport -L/sw/sles9-x64/acml-3.6.0/pathscale64/lib -lacml -lacml_mv
+#SRCDIRS  =
+#MPIROOT  = /sw/sles9-x64/ofed/openmpi-1.2.5-path
+#
+#ARCH       = LINUX
+#
+#MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -L/usr/local/ofed/lib64 -libverbs -lrt -lnuma -ldl -lnsl -lutil -lpthread
+#
+#NETCDFROOT = /sw/sles9-x64/netcdf-3.6.1
+#
+#CC       = gcc
+#CFLAGS   = -O -DpgiFortran
+#
+#DEFOPT   = -D
+#MODOPT   = -I
+#
+#-----------------------------------------------------------------------------
+# Intel ifort 10.1/OPenMPI 1.2.5, tornado@MPI/DKRZ
+#
+#F90      = ifort
+#FFLAGS   = -xW -mieee-fp -O3 -ip -g
+#F90FLAGS = -xW -mieee-fp -O3 -ip -g -fpp -DHAVE_LIBNETCDF64
+#LIBS     = -L../lib -lsupport -llapack -lblas
+#SRCDIRS  =
+#MPIROOT  = /sw/sles9-x64/ofed/openmpi-1.2.5-intel
+#
+#ARCH       = LINUX
+#
+#MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -L/usr/local/ofed/lib64 -libverbs -lrt -lnuma -ldl -lnsl -lutil -lpthread
+#
+#NETCDFROOT = /sw/sles9-x64/netcdf-3.6.1
+#
+#CC       = gcc
+#CFLAGS   = -O -DpgiFortran
+#
+#DEFOPT   = -D
+#MODOPT   = -I
+#
+#-----------------------------------------------------------------------------
+# Sun f95 Studio12u1/OPenMPI 1.2.5, tornado@MPI/DKRZ
+#
+#F90      = sunf95
+#FFLAGS   = -fast -xvector=simd -fsimple=1 -g
+#F90FLAGS = -fast -xvector=simd -fsimple=1 -g -fpp -DHAVE_LIBNETCDF64
+#LIBS     = -L../lib -lsupport -llapack -lblas
+#SRCDIRS  = blas lapack
+#MPIROOT  = /sw/sles9-x64/ofed/openmpi-1.2.5-sun
+#
+#ARCH       = LINUX
+#
+#MPI_LIB    = -lmpi_f90 -lmpi_f77 -lmpi -lopen-rte -lopen-pal -L/usr/local/ofed/lib64 -libverbs -lrt -lnuma -ldl -lnsl -lutil -lpthread
+#
+#NETCDFROOT = /sw/sles9-x64/netcdf-3.6.1
+#
+#CC       = gcc
+#CFLAGS   = -O -DsunFortran
+#
+#DEFOPT   = -D
+#MODOPT   = -M
+#
+#-----------------------------------------------------------------------------

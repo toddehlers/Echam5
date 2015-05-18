@@ -1,0 +1,25 @@
+- 2005-11-30 removed post/burn, please read README.afterburner
+
+- 2005-11-12 for DKRZ NEC SX-6 (and other NEC SX machines) the model
+             is compiled by default with OpenMP support. When the model
+             is used inside a single node the pure OpenMP mode delivers
+             higher peformance than the pure MPI version (~ 5-6 %)
+             Instead of using OMP_NUM_THREADS ECHAM5_THREADS is used
+             to define the number of CPUs used by OpenMP. When the model
+             should run on several nodes use one MPI Process per node.
+             MPIEXPORT is not required! The number of OpenMP CPUs is
+             handled inside the model.      
+
+- 2005-09-07 echam can be used with OpenMP too. As well a hybrid
+             version of MPI/OpenMP has been tested and works.
+             Performance might not be perfect by now.
+
+             Preliminary support for parallel netcdf from ANL
+             is available. A bug in MPI does not allow the usage
+             at DKRZ till updates in early 2006.
+
+             The model does not need -r8 or similar switches anymore.
+
+             HDF5 support for restart files has been removed as it can
+             be handled by netcdf with large file support (requires
+             netcdf-3.6.0-p1 at least). 

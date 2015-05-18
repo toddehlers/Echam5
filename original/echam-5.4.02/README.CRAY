@@ -1,0 +1,27 @@
+==============================================================================
+CRAY X1E
+
+It seems that the CRAY compiler have some trouble compiling several files,
+so compile time options are quite low.
+
+Setup is for cross compiling, but does work native as well.
+
+configure --host=nv1
+
+
+Luis Kornblueh, 2007-05-31 (luis.kornblueh@zmaw.de)
+
+==============================================================================
+CRAY XT3
+
+setup tested on CRAY XT3 at CSCS. In case of problems, let me know. 
+For configuration use 
+
+configure --host=xt3
+
+It is a cross compiling environment.
+
+Luis Kornblueh, 2005-10-31 (luis.kornblueh@zmaw.de)
+
+==============================================================================
+

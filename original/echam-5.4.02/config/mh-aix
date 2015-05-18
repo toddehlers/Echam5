@@ -1,0 +1,29 @@
+# hpce/ECMWF
+
+# Enable CC and F90 only, if not the standard compiler should be used
+
+ARCH       = rs6000
+
+MPIROOT    =
+MPI_LIB    =
+
+NETCDFROOT = /usr/local/lib/netcdf/current
+
+CC       = xlc_r
+CFLAGS   = -q64 -O2 -Dextname
+
+
+# currently OpenMP support is broken ;-)
+
+FC       = mpxlf_r
+FFLAGS   = -q64 -qextname -O3 -qstrict
+F90      = mpxlf95_r
+F90FLAGS = -qtbtable=full -q64 -qextname -qsuppress=1518-061:1518-128 -O3 -qstrict -qMAXMEM=-1 -Q -qarch=auto -qtune=auto -qcache=auto -qfloat=fltint -qsuffix=cpp=f90 -qzerosize -qessl
+
+DEFOPT   = -WF,-D
+
+MODOPT   = -I
+
+LIBS     = -L../lib -lsupport -L/ms_perm/breeding/lib -llapack -ltmglib -lessl
+
+SRCDIRS  =

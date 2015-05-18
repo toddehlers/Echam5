@@ -1,0 +1,135 @@
+#!/bin/ksh
+
+#PBS -l cpunum_prc=1
+#PBS -l cputim_job=02:00:00
+#PBS -l memsz_job=500mb
+#PBS -N subNNN
+#PBS -j o
+#PBS -M email                   # email address
+#PBS -q pp                      # queue for postprocessing
+################################################################################
+#
+hostname
+#
+set -e
+#
+################################################################################
+#DPATH
+#EXP
+#DAY
+#MONTH
+#YEAR
+#
+F_PROGINF=detail
+export F_PROGINF
+#
+if [ "$MONTH" = "12" ]
+then
+#
+# do postprocessing for one year
+#
+COPY=$UTF/runNNN/means
+EXPNO=`echo $EXP | cut -c1-5`
+# afterburner on hurrikan
+#SERV=/pf/m/m214003/bin/after
+# afterburner on cross
+SERV=/pool/ia64/afterburner/after
+#
+cd $DPATH
+#
+cat >inp_list1 <<'EOR1'
+ $select
+ code=89,91,92,93,94,95,96,97,102,103,104,105,106,107,108,109,110,111,112,113,
+      114,115,116,117,118,119,120,121,122,123,124,125,126,
+      134,137,139,140,141,142,143,144,145,146,147,150,151,160,161,164,165,166,
+      167,168,169,171,172,175,176,177,178,179,180,181,182,184,
+      185,186,187,188,193,197,203,204,205,206,207,208,209,
+      210,211,213,214,216,218,221,222,229,230,231,232,233,260,
+ type=20,
+ LEVEL=1,2,3,4,5,
+ GRIB=1,
+ mean=1,
+ $end
+EOR1
+#
+cat > SELECT1 << eos3
+ &SELECT
+ CODE=130,131,132,133,153,154,156,157,223,
+ LEVEL=100000,92500,85000,77500,70000,60000,50000,40000,
+ 30000,25000,20000,15000,10000,7000,5000,3000,1000,
+ TYPE=30,
+ GRIB=1,
+ MEAN=1
+ &END
+eos3
+#
+cat > SELECT2 << eos3
+ &SELECT
+ CODE=138,148,149,155,
+ LEVEL=100000,92500,85000,77500,70000,60000,50000,40000,
+ 30000,25000,20000,15000,10000,7000,5000,3000,1000,
+ TYPE=70,
+ GRIB=1,
+ MEAN=1
+ &END
+eos3
+#
+monthlist="01 02 03 04 05 06 07 08 09 10 11 12"
+#
+for MM in $monthlist ; do
+#
+ANHA=${YEAR}${MM}
+DATF=${EXP}_${YEAR}${MM}.${DAY}
+#
+#
+###################################################
+# make postpro
+#
+$SERV <inp_list1 $DATF $COPY/BOT_$ANHA
+$SERV <SELECT1 $DATF ATM_1
+$SERV <SELECT2 $DATF ATM_2
+cdo merge ATM_1 ATM_2 $COPY/ATM_$ANHA
+#
+cp $DATF $UT/runNNN
+STAT=$?
+
+FSIZE=`ls -l $UT/runNNN/$DATF | awk '{print \$5}'`
+FSIZE_OK=`ls -l $DATF | awk '{print \$5}'`
+  if [ $STAT -eq 0 -a "${FSIZE}" -eq ${FSIZE_OK} ] ; then
+    echo 'Safe = '$SAFE' : $FSIZE='$FSIZE' $FSIZE_OK='${FSIZE_OK}
+    rm $DATF
+  else
+    SAFE=false
+    echo 'Safe = false : $FSIZE='$FSIZE' $FSIZE_OK='${FSIZE_OK}
+  fi
+#
+done
+#
+###################################################
+# save monthly means
+#
+cd $COPY
+tar cvf MEAN${YEAR} BOT_${YEAR}* ATM_${YEAR}*
+#
+cp MEAN${YEAR} $UT/runNNN/means
+STAT=$?
+
+FSIZE=`ls -l $UT/runNNN/means/MEAN${YEAR} | awk '{print \$5}'`
+#
+# check here the right file size to be compared with your tar-file
+#
+FSIZE_OK=39311360
+  if [ $STAT -eq 0 -a "${FSIZE}" -eq ${FSIZE_OK} ] ; then
+    echo 'Safe = '$SAFE' : $FSIZE='$FSIZE' $FSIZE_OK='${FSIZE_OK}
+    rm MEAN${YEAR} BOT_${YEAR}?? ATM_${YEAR}??
+  else
+    SAFE=false
+    echo 'Safe of mean= false : $FSIZE='$FSIZE' $FSIZE_OK='${FSIZE_OK}
+  fi
+#
+####################################################
+#
+fi
+#
+# end of one year's postprocessing and data storage
+#

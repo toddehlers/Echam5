@@ -1,0 +1,21 @@
+EXPERIMENTAL!!!
+
+Parallel netCDF use is activated by compiling with
+
+-DHAVE_LIBPNETCDF
+
+default behaviour is then for each processor to output their portions of 
+the gaussian output fields separately, but for p_io to gather the 
+spectral fields and output them whole. The gaussian fields can be 
+gathered and output by p_io only (but still using the parallel netCDF 
+libs rather than the regular netCDF libraries) by compiling with
+
+-DLIBPNETCDF_NOGAUSS
+
+and the spectral fields can be output by each processor separately, 
+without gathering into a global field first, by using
+
+-DLIBPNETCDF_SPEC
+
+but this last option is /very/ slow at the moment.
+

@@ -1,0 +1,177 @@
+#! /bin/ksh
+#-----------------------------------------------------------------------------
+# Version for LoadLeveler (IBM)
+#
+# @ shell                = /usr/bin/ksh
+# @ output               = $(host).$(jobid).o
+# @ error                = $(host).$(jobid).o
+# @ job_type             = parallel
+# @ Network.MPI          = csss,shared,US
+# @ class                = np
+## for OpenMP ... 
+## @ resources            = ConsumableCpus(4) ConsumableMemory(400mb)
+# @ node                 = 1
+# @ tasks_per_node       = 8
+# @ notification         = never
+# @ job_name             = eeexxx
+# @ cpu_limit            = 04:00:00
+# @ wall_clock_limit     = 04:00:00
+#-----------------------------------------------------------------------------
+## for OpenMP
+# This section has not been working properly ay ECMWF.
+#
+# @ rset                 = rset_mcm_affinity
+# @ mcm_affinity_options = mcm_distribute mcm_mem_req mcm_sni_none
+#
+# ECMWF recommendation:
+#
+#  - add to LIB in the Makefile:
+#    LIB      = -L/usr/local/lib/eclib -lecsmp.LP64.R32.D64.I32
+#
+#  - for runtime you need to add in the script:
+#    export EC_BIND="0 16 1 17 2 18 3 19 4 20 5 21 6 22 7 23 8 24 9 25 10 26 11 27 12 28 13 29 14 30 15 31"
+#
+#-----------------------------------------------------------------------------
+## for OpenMP and partly for MPI
+# This section is not working properly as stated by IBM (C. Pospiech)
+# 
+## @ environment          = MEMORY_AFFINITY=MCM; \
+##                          MP_SHARED_MEMORY=yes; MP_WAIT_MODE=poll; \
+##                          MP_SINGLE_THREAD=yes; MP_TASK_AFFINITY=MCM; \
+##                          OMP_NUM_THREADS=4 
+#
+#-----------------------------------------------------------------------------
+#
+# @ queue
+#
+#-----------------------------------------------------------------------------
+#
+# Version for shell script running on ECMWF Power 4+ (hpcd)
+#
+#-----------------------------------------------------------------------------
+#
+#                        Job file to run ECHAM 5
+#
+#-----------------------------------------------------------------------------
+#
+# If a command has a non-zero exit status, execute ERR trap, if set, and exit
+#
+set -ex
+#
+#-----------------------------------------------------------------------------
+#
+# experiment identifier (replace EEEEE with your m2140XX and a three digit
+# number for the current experiment, TTTT replace by some text
+# EXP=EEEEETTTT (see as well above for the job names)
+#
+EXP="EEEEETTTT"  # experiment identifier
+#
+RERUN=.false.    # Rerun switch; .false. for initial run, .true. else
+#
+NPROMA=11        # Blocking length, should be large for vector architecture
+# 
+NCPUS=8          # Number of CPUS for parallel run
+NPROCA=8
+NPROCB=1
+#
+# take care: OpenMP threads must be set before in the LoadLeveler (ConsumableCpus(4))
+#            and the following OMP_NUM_THREADS
+# NTHREADS=4       
+#
+RES=31           # spectral truncation of run
+LEVELS=19        # number of levels
+#
+#-----------------------------------------------------------------------------
+#
+WORK_DIR=/home/ms/spdekplb/hmk/echam5
+#
+# absolute path to directory with job scripts:
+SCRIPTDIR=${WORK_DIR}/run
+#
+# absolute path to directory with plenty of space:
+EXPDIR=/hpcd/tmp/ms/spdekplb/hmk/experiments/${EXP}
+#
+# absolute path to directory with initial data:
+INITIAL_DATA=/ms_perm/echam/T${RES}
+#
+# absolute path to directory with SST and sea ice files:
+BOUNDARY_DATA=${INITIAL_DATA}/amip2
+#
+# absolute path to model binary, including the executable
+MODEL=${WORK_DIR}/bin/echam5
+#
+#-----------------------------------------------------------------------------
+#
+# the directory for the experiment will be created, if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+#
+#-----------------------------------------------------------------------------
+#
+cd $EXPDIR           #  output and rerun files are written into $EXPDIR
+#
+#-----------------------------------------------------------------------------
+#
+# specification of files
+#
+#-----------------------------------------------------------------------------
+#
+rm -f unit.?? sst* ice* hdpara.nc hdstart.nc rrtadata 
+#
+ln -s  ${INITIAL_DATA}/T${RES}L${LEVELS}_jan_spec.nc       unit.23
+ln -s  ${INITIAL_DATA}/T${RES}_jan_surf.nc                 unit.24
+#
+ln -s  ${INITIAL_DATA}/T${RES}_O3clim2.nc                  unit.21
+ln -s  ${INITIAL_DATA}/T${RES}_VLTCLIM.nc                  unit.90
+ln -s  ${INITIAL_DATA}/T${RES}_VGRATCLIM.nc                unit.91
+ln -s  ${INITIAL_DATA}/T${RES}_TSLCLIM2.nc                 unit.92
+#
+ln -s  ${INITIAL_DATA}/surrta_data                         rrtadata
+ln -s  ${INITIAL_DATA}/hdpara.nc                           hdpara.nc
+ln -s  ${INITIAL_DATA}/hdstart.nc                          hdstart.nc
+#
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sst_clim.nc           unit.20
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sic_clim.nc           unit.96
+#
+years="1977 1978 1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 1989"
+years="${years} 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000"
+for year in $years ; do
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sst_${year}.nc  sst${year}
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sic_${year}.nc  ice${year}
+done
+#
+#-----------------------------------------------------------------------------
+#
+# ECHAM5 namelist
+#   - for production runs set LABORT=.FALSE.
+#
+cat > namelist.echam << EOF
+&runctl
+  out_datapath = "${EXPDIR}/"
+  out_expname  = "${EXP}"
+  out_filetype = 1                  ! 1 - GRIB1, 2 - netCDF
+  lresume      = $RERUN
+  lamip        = T
+  labort       = T
+  dt_start     = 1978,01,01,12,0,0
+  dt_stop      = 1998,12,31,12,0,0
+  putdata      = 6, 'hours', 'first', 0
+  putrerun     = 10, 'days', 'last', 0
+  nproma       = ${NPROMA} 
+  nproca       = ${NPROCA}
+  nprocb       = ${NPROCB}
+/
+EOF
+#
+#-----------------------------------------------------------------------------
+#
+# IBM/POE startup
+#
+poe $MODEL 
+#
+#-----------------------------------------------------------------------------
+#
+exit
+#
+#-----------------------------------------------------------------------------
